@@ -35,7 +35,7 @@ const Footer = () => {
             <div className="flex items-center gap-3 mb-4">
               <span className="inline-flex h-10 w-10 rounded-full bg-vibrant-blue/20" />
               <h1 className="text-lg font-black leading-tight">
-                <span className="italic">Pandalungan Festival</span>
+                <span className="italic">Night Run Kejaksaan</span>
               </h1>
             </div>
             <p className="text-muted-foreground text-sm leading-relaxed mb-4">

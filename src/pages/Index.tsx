@@ -46,9 +46,9 @@ const Index = () => {
               <h1 className="text-5xl lg:text-7xl font-black leading-tight z-20 text-left">
                 <span className="italic">LET'S RUN</span>
                 <br />
-                <span className="italic">PANDALUNGAN FESTIVAL</span>
+                <span className="italic">WITH NIGHT RUN</span>
                 <br />
-                <span className="italic"> NIGHT RUN</span>
+                <span className="italic">KEJAKSAAN</span>
                 <br />
                 <span className="italic text-vibrant-lime">2025</span>
               </h1>
