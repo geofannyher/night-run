@@ -8,6 +8,7 @@ import EventDetailsSection from "@/components/EventDetailsSection";
 import PricingSection from "@/components/PricingSection";
 import TimelineSection from "@/components/TimelineSection";
 import FAQSection from "@/components/FAQSection";
+import Footer from "@/components/Footer";
 import runningGroupImage from "@/assets/running-group.jpg";
 
 const Index = () => {
@@ -120,6 +121,7 @@ const Index = () => {
       <PricingSection />
       <TimelineSection />
       <FAQSection />
+      <Footer />
     </div>
   );
 };
