@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
 
 const Header = () => {
   return (
@@ -19,11 +18,6 @@ const Header = () => {
           SIGNUP
         </Button>
       </div>
-
-      {/* Mobile Menu */}
-      <Button variant="ghost" size="icon" className="md:hidden">
-        <Menu className="h-5 w-5" />
-      </Button>
     </header>
   );
 };
