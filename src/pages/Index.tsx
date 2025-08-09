@@ -3,6 +3,11 @@ import Header from "@/components/Header";
 import RunCard from "@/components/RunCard";
 import TestimonialCard from "@/components/TestimonialCard";
 import RunStatCard from "@/components/RunStatCard";
+import RewardsSection from "@/components/RewardsSection";
+import EventDetailsSection from "@/components/EventDetailsSection";
+import PricingSection from "@/components/PricingSection";
+import TimelineSection from "@/components/TimelineSection";
+import FAQSection from "@/components/FAQSection";
 import runningGroupImage from "@/assets/running-group.jpg";
 
 const Index = () => {
@@ -108,6 +113,13 @@ const Index = () => {
           </div>
         </div>
       </main>
+
+      {/* Event Sections */}
+      <RewardsSection />
+      <EventDetailsSection />
+      <PricingSection />
+      <TimelineSection />
+      <FAQSection />
     </div>
   );
 };
