@@ -8,11 +8,6 @@ const NightRunDetailSection = () => {
       description:
         "Jl. Sudirman (Alun - Alun Jember, Depan Pemkab) - Sabtu, 6 September 2025 - 19:00 WIB",
     },
-    {
-      icon: Users,
-      title: "Pendaftaran Offline",
-      description: "Kantor Kejaksaan Negeri Jember dan Cafe Kopi Naga 99",
-    },
   ];
 
   return (

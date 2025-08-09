@@ -60,14 +60,14 @@ const ActivitiesSection = () => {
                   <h3 className="text-xl font-bold">{act.title}</h3>
                 </div>
 
-                <ul className="space-y-3 text-muted-foreground">
+                {/* <ul className="space-y-3 text-muted-foreground">
                   {act.points.map((pt, i) => (
                     <li key={i} className="flex items-start gap-2">
                       <CheckCircle2 className="w-4 h-4 mt-1 text-vibrant-lime" />
                       <span>{pt}</span>
                     </li>
                   ))}
-                </ul>
+                </ul> */}
               </div>
             );
           })}

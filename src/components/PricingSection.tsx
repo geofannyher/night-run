@@ -8,6 +8,7 @@ const PricingSection = () => {
       price: "IDR 160,000",
       image: "/placeholder.svg",
       inStock: true,
+      participants: "500 peserta",
       link: "/register-running?category=5k",
     },
     {
@@ -15,8 +16,15 @@ const PricingSection = () => {
       price: "IDR 180,000",
       image: "/placeholder.svg",
       inStock: true,
+      participants: "500 peserta",
       link: "/register-running?category=10k",
     },
+  ];
+
+  const targetAudience = [
+    "Pemula dan pelari berpengalaman",
+    "Komunitas lari (antar lintas kota)",
+    "Antar lintas komunitas",
   ];
 
   return (
@@ -61,8 +69,11 @@ const PricingSection = () => {
                 <div className="text-sm uppercase tracking-wider text-muted-foreground">
                   Night Run {tier.title}
                 </div>
-                <div className="mt-0.5 text-md font-extrabold">
+                <div className="mt-0.5 text-base font-extrabold">
                   {tier.price}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  {tier.participants}
                 </div>
                 <div className="mt-auto pt-1 w-full">
                   <Link to={tier.link}>
@@ -79,6 +90,23 @@ const PricingSection = () => {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Target Audience - centered pills */}
+        <div className="mt-8 max-w-3xl mx-auto">
+          <div className="p-6 bg-muted/30 rounded-2xl text-center">
+            <h3 className="text-xl font-bold mb-3">Sasaran Peserta</h3>
+            <div className="flex flex-wrap justify-center gap-2">
+              {targetAudience.map((item) => (
+                <span
+                  key={item}
+                  className="px-3 py-1 rounded-full bg-background ring-1 ring-border text-sm text-muted-foreground"
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>

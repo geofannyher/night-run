@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
+  const navigate = useNavigate();
   return (
     <header className="flex items-center justify-between p-6 max-w-7xl mx-auto">
       <div className="flex items-center gap-2">
@@ -10,13 +12,20 @@ const Header = () => {
       </div>
 
       <div className="hidden md:flex items-center gap-4">
-        <Button variant="ghost">LOGIN</Button>
         <Button
+          variant="ghost"
+          onClick={() => {
+            navigate("/login-admin");
+          }}
+        >
+          LOGIN
+        </Button>
+        {/* <Button
           variant="default"
           className="rounded-sm bg-vibrant-lime hover:bg-vibrant-lime"
         >
           SIGNUP
-        </Button>
+        </Button> */}
       </div>
     </header>
   );

@@ -30,7 +30,7 @@ const FAQSection = () => {
     {
       question: "Apakah jersey bisa ditukar jika ukurannya tidak pas?",
       answer:
-        "Tidak, jersey yang sudah diterima tidak dapat ditukar. Pastikan memilih ukuran yang sesuai saat pendaftaran.",
+        "Tidak, jersey yang sudah diterima tidak dapat ditukar. Jersey yang diberikan adalah ukuran All Size",
     },
     {
       question: "Apakah ada batasan usia peserta?",

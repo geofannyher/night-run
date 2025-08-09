@@ -48,9 +48,7 @@ const RegistrationDetailsSection = () => {
             <div className="p-6 bg-background rounded-2xl">
               <h3 className="text-xl font-bold mb-3">Race Pack</h3>
               <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-                <li>
-                  No BIB (Bahan Albatros, Panjang 21cm, Lebar 14cm, Peniti)
-                </li>
+                <li>No BIB</li>
                 <li>Jersey</li>
               </ul>
             </div>
@@ -85,6 +83,7 @@ const RegistrationDetailsSection = () => {
               <h3 className="text-xl font-bold mb-3">Catatan</h3>
               <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
                 <li>Jersey tidak bisa ditukar.</li>
+                <li>Jersey diberikan ukuran All Size.</li>
                 <li>Cek nama dan nomor BIB.</li>
                 <li>Cek kelengkapan Race Pack.</li>
               </ul>
@@ -95,10 +94,6 @@ const RegistrationDetailsSection = () => {
                 Refreshment & Water Station
               </h3>
               <ul className="list-disc pl-6 space-y-2 text-muted-foreground">
-                <li>
-                  500 Finisher pertama akan mendapatkan medali (5K untuk 300
-                  orang, 10K untuk 200 orang).
-                </li>
                 <li>
                   All finisher berhak mendapatkan refreshment (produk sponsor,
                   Isotonik, Buah/ Snack, Air Mineral, dll).
