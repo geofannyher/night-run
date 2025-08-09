@@ -8,41 +8,61 @@ import {
 const FAQSection = () => {
   const faqs = [
     {
-      question: "What is included in the registration fee?",
-      answer: "Your registration fee includes an exclusive event jersey, race number, water station support, and participation certificate. You'll also receive a finisher medal upon completion."
+      question: "Apa saja yang termasuk dalam biaya pendaftaran?",
+      answer:
+        "Biaya pendaftaran mencakup jersey eksklusif event, nomor BIB (bahan Albatros + peniti), akses water station sesuai kategori, refreshment di garis finish, dan medali untuk finisher pertama (300 orang untuk 5K dan 200 orang untuk 10K).",
     },
     {
-      question: "Can I change my race category after registration?",
-      answer: "Yes, you can change your race category (5K to 10K or vice versa) until June 25, 2025. Please contact our support team to make the change."
+      question: "Kapan periode pendaftaran Night Run 2025?",
+      answer:
+        "Pendaftaran dibuka mulai 1 Agustus 2025 dan ditutup pada 31 Agustus 2025, atau lebih cepat jika kuota terpenuhi.",
     },
     {
-      question: "What happens if it rains on the event day?",
-      answer: "The event will proceed rain or shine. In case of severe weather conditions that pose safety risks, we may delay the start time. Updates will be communicated via WhatsApp and our official channels."
+      question: "Bagaimana cara mendaftar?",
+      answer:
+        "Kunjungi landing page resmi Night Run Kejaksaan Negeri Jember, isi formulir pendaftaran, lakukan pembayaran via Virtual Account, dan konfirmasi pembayaran akan dikirimkan via email. E-ticket akan dikirim ke WhatsApp Anda.",
     },
     {
-      question: "Is there an age limit for participants?",
-      answer: "Participants must be at least 16 years old for the 5K category and 18 years old for the 10K category. Minors require parental consent and must be accompanied by a guardian."
+      question: "Kapan dan di mana pengambilan Race Pack?",
+      answer:
+        "Race Pack dapat diambil pada 4-5 September 2025 pukul 10.00 - 20.00 WIB di Kantor Kejaksaan Negeri Jember atau Cafe Kopi Naga 99. Harap membawa fotokopi KTP/identitas, e-ticket, dan surat pernyataan sehat. Jika diwakilkan, sertakan surat kuasa.",
     },
     {
-      question: "When and where can I collect my race pack?",
-      answer: "Race pack collection will be available on July 1-2, 2025, from 10:00 AM to 8:00 PM at Jember Town Square. Please bring your ID and registration confirmation."
+      question: "Apakah jersey bisa ditukar jika ukurannya tidak pas?",
+      answer:
+        "Tidak, jersey yang sudah diterima tidak dapat ditukar. Pastikan memilih ukuran yang sesuai saat pendaftaran.",
     },
     {
-      question: "Are there medical facilities available during the event?",
-      answer: "Yes, we have medical personnel and first aid stations positioned along the route and at the finish line to ensure participant safety throughout the event."
-    }
+      question: "Apakah ada batasan usia peserta?",
+      answer:
+        "Tidak ada batasan usia spesifik, namun peserta harus dalam kondisi sehat jasmani dan rohani. Anak-anak dianjurkan didampingi oleh orang tua atau wali.",
+    },
+    {
+      question: "Apa yang terjadi jika hujan saat event?",
+      answer:
+        "Event akan tetap berjalan meskipun hujan. Namun, jika cuaca ekstrem membahayakan keselamatan peserta, panitia dapat menunda atau membatalkan acara.",
+    },
+    {
+      question: "Fasilitas apa saja yang tersedia di rute lari?",
+      answer:
+        "Tersedia water station di pertengahan dan garis finish untuk 5K dan 10K, medical team, refreshment di garis finish, photobooth, dan hiburan di panggung utama.",
+    },
   ];
 
   return (
     <section className="py-16">
       <div className="max-w-4xl mx-auto px-6">
         <h2 className="text-4xl lg:text-5xl font-black italic text-center mb-12">
-          FREQUENTLY ASKED <span className="text-vibrant-blue">QUESTIONS</span>
+          FREQUENTLY ASKED <span className="text-vibrant-lime">QUESTIONS</span>
         </h2>
-        
+
         <Accordion type="single" collapsible className="space-y-4">
           {faqs.map((faq, index) => (
-            <AccordionItem key={index} value={`item-${index}`} className="border border-border rounded-2xl px-6">
+            <AccordionItem
+              key={index}
+              value={`item-${index}`}
+              className="rounded-2xl px-6"
+            >
               <AccordionTrigger className="text-left font-bold text-lg hover:no-underline">
                 {faq.question}
               </AccordionTrigger>

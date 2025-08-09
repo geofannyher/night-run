@@ -5,31 +5,19 @@ const Header = () => {
   return (
     <header className="flex items-center justify-between p-6 max-w-7xl mx-auto">
       <div className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-          <span className="text-white font-bold text-sm">S</span>
-        </div>
-        <span className="font-bold text-xl">SOUNDTRACK</span>
+        <h1 className="text-lg font-black leading-tight">
+          <span className="italic">Pandalungan Festival</span>
+        </h1>
       </div>
-      
-      {/* Desktop Navigation */}
-      <nav className="hidden md:flex items-center gap-8">
-        <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-          HOW IT WORKS
-        </a>
-        <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-          FEATURES
-        </a>
-        <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-          COMMUNITY
-        </a>
-        <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-          PRICING
-        </a>
-      </nav>
 
       <div className="hidden md:flex items-center gap-4">
         <Button variant="ghost">LOGIN</Button>
-        <Button variant="hero">SIGNUP</Button>
+        <Button
+          variant="default"
+          className="rounded-sm bg-vibrant-lime hover:bg-vibrant-lime"
+        >
+          SIGNUP
+        </Button>
       </div>
 
       {/* Mobile Menu */}
