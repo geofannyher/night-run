@@ -58,10 +58,10 @@ const PricingSection = () => {
               </div>
 
               <div className="p-2 flex-1 flex flex-col items-center text-center">
-                <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                <div className="text-sm uppercase tracking-wider text-muted-foreground">
                   Night Run {tier.title}
                 </div>
-                <div className="mt-0.5 text-sm font-extrabold">
+                <div className="mt-0.5 text-md font-extrabold">
                   {tier.price}
                 </div>
                 <div className="mt-auto pt-1 w-full">
