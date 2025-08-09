@@ -43,7 +43,7 @@ const Index = () => {
               </div> */}
 
               {/* Main Heading */}
-              <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black leading-tight z-20 text-center sm:text-left">
+              <h1 className="text-5xl lg:text-7xl font-black leading-tight z-20 text-left">
                 <span className="italic">LET'S RUN</span>
                 <br />
                 <span className="italic">PANDALUNGAN FESTIVAL</span>
