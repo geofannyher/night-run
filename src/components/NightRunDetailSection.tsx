@@ -1,12 +1,16 @@
-import { Calendar, Users } from "lucide-react";
+import { Calendar, MapPin } from "lucide-react";
 
 const NightRunDetailSection = () => {
   const highlights = [
     {
+      icon: MapPin,
+      title: "Lokasi",
+      description: "Jl. Sudirman (Alun - Alun Jember, Depan Pemkab)",
+    },
+    {
       icon: Calendar,
-      title: "Lokasi, Jam & Tanggal Acara",
-      description:
-        "Jl. Sudirman (Alun - Alun Jember, Depan Pemkab) - Sabtu, 6 September 2025 - 19:00 WIB",
+      title: "Jam & Tanggal Acara",
+      description: "Sabtu, 6 September 2025 - 19:00 WIB",
     },
   ];
 
