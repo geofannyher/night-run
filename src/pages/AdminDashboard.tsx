@@ -82,7 +82,7 @@ const AdminDashboard = () => {
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Stats Cards */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Total Registrations</CardTitle>
@@ -128,16 +128,16 @@ const AdminDashboard = () => {
               List of all participants registered for the running event
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Phone</TableHead>
-                  <TableHead>City</TableHead>
-                  <TableHead>Category</TableHead>
-                  <TableHead>Registered Date</TableHead>
+                  <TableHead className="min-w-[120px]">Name</TableHead>
+                  <TableHead className="min-w-[200px]">Email</TableHead>
+                  <TableHead className="min-w-[140px]">Phone</TableHead>
+                  <TableHead className="min-w-[100px]">City</TableHead>
+                  <TableHead className="min-w-[80px]">Category</TableHead>
+                  <TableHead className="min-w-[120px]">Registered Date</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
