@@ -29,32 +29,30 @@ const PricingSection = () => {
     refetchInterval: 30000, // Refetch every 30 seconds
   });
 
+  const MAX_PARTICIPANTS = 500;
+
   const tiers = [
     {
       title: "5K",
       price: "IDR 160,000",
       image: "/placeholder.svg",
-      inStock: stockData ? stockData.count5 > 0 : true,
-      participants: stockData
-        ? `${stockData.count5} tiket tersisa`
-        : isStockLoading
-        ? "Memuat..."
-        : "500 peserta",
+      inStock: stockData ? stockData.count5 < MAX_PARTICIPANTS : true,
       link: "/register-running?category=5k",
       stockCount: stockData?.count5 || 0,
+      remaining: stockData
+        ? MAX_PARTICIPANTS - stockData.count5
+        : MAX_PARTICIPANTS,
     },
     {
       title: "10K",
       price: "IDR 180,000",
       image: "/placeholder.svg",
-      inStock: stockData ? stockData.count10 > 0 : true,
-      participants: stockData
-        ? `${stockData.count10} tiket tersisa`
-        : isStockLoading
-        ? "Memuat..."
-        : "500 peserta",
+      inStock: stockData ? stockData.count10 < MAX_PARTICIPANTS : true,
       link: "/register-running?category=10k",
       stockCount: stockData?.count10 || 0,
+      remaining: stockData
+        ? MAX_PARTICIPANTS - stockData.count10
+        : MAX_PARTICIPANTS,
     },
   ];
 
@@ -109,19 +107,13 @@ const PricingSection = () => {
                 <div className="mt-0.5 text-base font-extrabold">
                   {tier.price}
                 </div>
-                <div
-                  className={`text-xs ${
-                    stockData
-                      ? tier.stockCount <= 0
-                        ? "text-red-500 font-semibold"
-                        : tier.stockCount <= 5
-                        ? "text-orange-500 font-medium"
-                        : "text-green-600"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  {tier.participants}
-                </div>
+                {stockData && tier.remaining <= 10 && tier.remaining > 0 && (
+                  <div className="mt-1 px-2 py-0.5 bg-orange-100 rounded-full">
+                    <div className="text-[10px] font-bold text-orange-700 uppercase tracking-wide">
+                      Hampir Penuh!
+                    </div>
+                  </div>
+                )}
                 {stockError && (
                   <div className="text-[10px] text-red-500 mt-1">
                     Gagal memuat stok
