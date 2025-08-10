@@ -1,23 +1,60 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 const PricingSection = () => {
+  // Fetch ticket stock data
+  const {
+    data: stockData,
+    isLoading: isStockLoading,
+    error: stockError,
+  } = useQuery({
+    queryKey: ["ticketStock"],
+    queryFn: async () => {
+      try {
+        const response = await axios.get(
+          "https://event-be-one.vercel.app/peserta/count"
+        );
+        return response.data.data;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          throw new Error(
+            error.response?.data?.message || "Failed to fetch ticket stock"
+          );
+        }
+        throw new Error("Failed to fetch ticket stock");
+      }
+    },
+    refetchInterval: 30000, // Refetch every 30 seconds
+  });
+
   const tiers = [
     {
       title: "5K",
       price: "IDR 160,000",
       image: "/placeholder.svg",
-      inStock: true,
-      participants: "500 peserta",
+      inStock: stockData ? stockData.count5 > 0 : true,
+      participants: stockData
+        ? `${stockData.count5} tiket tersisa`
+        : isStockLoading
+        ? "Memuat..."
+        : "500 peserta",
       link: "/register-running?category=5k",
+      stockCount: stockData?.count5 || 0,
     },
     {
       title: "10K",
       price: "IDR 180,000",
       image: "/placeholder.svg",
-      inStock: true,
-      participants: "500 peserta",
+      inStock: stockData ? stockData.count10 > 0 : true,
+      participants: stockData
+        ? `${stockData.count10} tiket tersisa`
+        : isStockLoading
+        ? "Memuat..."
+        : "500 peserta",
       link: "/register-running?category=10k",
+      stockCount: stockData?.count10 || 0,
     },
   ];
 
@@ -72,18 +109,41 @@ const PricingSection = () => {
                 <div className="mt-0.5 text-base font-extrabold">
                   {tier.price}
                 </div>
-                <div className="text-xs text-muted-foreground">
+                <div
+                  className={`text-xs ${
+                    stockData
+                      ? tier.stockCount <= 0
+                        ? "text-red-500 font-semibold"
+                        : tier.stockCount <= 5
+                        ? "text-orange-500 font-medium"
+                        : "text-green-600"
+                      : "text-muted-foreground"
+                  }`}
+                >
                   {tier.participants}
                 </div>
+                {stockError && (
+                  <div className="text-[10px] text-red-500 mt-1">
+                    Gagal memuat stok
+                  </div>
+                )}
                 <div className="mt-auto pt-1 w-full">
                   <Link to={tier.link}>
                     <Button
                       size="sm"
                       variant="secondary"
-                      className="h-8 px-3 text-xs bg-white text-vibrant-lime hover:bg-white/90 w-full"
-                      disabled={!tier.inStock}
+                      className={`h-8 px-3 text-xs w-full ${
+                        tier.inStock
+                          ? "bg-white text-vibrant-lime hover:bg-white/90"
+                          : "bg-gray-200 text-gray-500 cursor-not-allowed"
+                      }`}
+                      disabled={!tier.inStock || isStockLoading}
                     >
-                      {tier.inStock ? "REGISTER NOW" : "SOLD OUT"}
+                      {isStockLoading
+                        ? "MEMUAT..."
+                        : tier.inStock
+                        ? "REGISTER NOW"
+                        : "SOLD OUT"}
                     </Button>
                   </Link>
                 </div>

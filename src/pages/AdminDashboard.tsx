@@ -42,6 +42,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner";
 import { Image } from "antd";
+import { Label } from "@radix-ui/react-label";
+import { Input } from "@/components/ui/input";
 
 interface Pembayaran {
   id: number;
@@ -53,8 +55,27 @@ interface Pembayaran {
   createdAt: string;
   updatedAt: string;
   deletedAt: string;
-  // TODO: Add when backend implements WhatsApp field
-  // wa?: string; // WhatsApp number like "089123456789"
+}
+
+interface UserData {
+  id: number;
+  nik: string;
+  nama_lengkap: string;
+  email: string;
+  no_wa: string;
+  alamat: string;
+  tanggal_lahir: string;
+  kota_domisili: string;
+  golongan_darah: string;
+  no_kontak_darurat: string;
+  riwayat_penyakit: string;
+  location_race_pack: string;
+  ukuran_jersey: string;
+  tipe: string;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string;
+  pembayaran: Pembayaran;
 }
 
 interface PaymentData {
@@ -67,8 +88,13 @@ const AdminDashboard = () => {
   const [selectedPayment, setSelectedPayment] = useState<Pembayaran | null>(
     null
   );
+  const [selectedUserData, setSelectedUserData] = useState<UserData | null>(
+    null
+  );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editFormData, setEditFormData] = useState<Partial<UserData>>({});
 
   // Fetch payment data from API - moved before early returns
   const {
@@ -82,7 +108,7 @@ const AdminDashboard = () => {
         const response = await axios.get(
           "https://event-be-one.vercel.app/peserta/list"
         );
-        return response.data.data as PaymentData[];
+        return response.data.data as UserData[];
       } catch (error) {
         if (axios.isAxiosError(error)) {
           throw new Error(
@@ -168,9 +194,73 @@ const AdminDashboard = () => {
     return null;
   }
 
-  const handleViewPayment = (pembayaran: Pembayaran) => {
-    setSelectedPayment(pembayaran);
+  const handleViewPayment = (userData: UserData) => {
+    setSelectedPayment(userData.pembayaran);
+    setSelectedUserData(userData);
+    setEditFormData(userData);
     setIsModalOpen(true);
+    setIsEditing(false);
+  };
+
+  const handleEditToggle = () => {
+    setIsEditing(!isEditing);
+  };
+
+  const handleEditInputChange = (field: keyof UserData, value: string) => {
+    setEditFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveEdit = async () => {
+    try {
+      // Prepare the request body according to API specification
+      const requestBody = {
+        id: editFormData.id,
+        nik: "",
+        nama_lengkap: editFormData.nama_lengkap || "",
+        email: editFormData.email || "",
+        no_wa: editFormData.no_wa || "",
+        alamat: editFormData.alamat || "",
+        tanggal_lahir: editFormData.tanggal_lahir || "",
+        kota_domisili: editFormData.kota_domisili || "",
+        golongan_darah: editFormData.golongan_darah || "",
+        no_kontak_darurat: editFormData.no_kontak_darurat || "",
+        riwayat_penyakit: editFormData.riwayat_penyakit || "",
+        location_race_pack: editFormData.location_race_pack || "",
+      };
+
+      console.log("Updating user data:", requestBody);
+
+      // Make API call to update user data
+      const response = await axios.put(
+        "https://event-be-one.vercel.app/peserta/update-peserta",
+        requestBody
+      );
+
+      if (response.data.status === 200) {
+        toast.success("Data berhasil diperbarui!");
+        setIsEditing(false);
+
+        // Update local data
+        if (selectedUserData) {
+          setSelectedUserData({ ...selectedUserData, ...editFormData });
+        }
+
+        // Refresh data to get latest from server
+        queryClient.invalidateQueries({ queryKey: ["payments"] });
+      } else {
+        throw new Error(response.data.message || "Gagal memperbarui data");
+      }
+    } catch (error) {
+      console.error("Error updating user data:", error);
+      if (axios.isAxiosError(error)) {
+        toast.error(
+          error.response?.data?.message ||
+            "Gagal memperbarui data. Silakan coba lagi."
+        );
+      } else {
+        toast.error("Gagal memperbarui data. Silakan coba lagi.");
+      }
+    }
   };
 
   const handleUpdatePaymentStatus = () => {
@@ -179,48 +269,38 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleWhatsAppContact = (pembayaran: Pembayaran) => {
-    // Use WhatsApp number from API if available, otherwise use dummy data
+  const handleWhatsAppContact = (userData: UserData) => {
+    // Use WhatsApp number from API
     let whatsappNumber: string;
 
-    // TODO: Uncomment this when backend adds "wa" field to the response
-    // if (pembayaran.wa) {
-    //   // Ensure number starts with 62 (Indonesia country code)
-    //   whatsappNumber = pembayaran.wa.startsWith('08')
-    //     ? '62' + pembayaran.wa.substring(1)
-    //     : pembayaran.wa.startsWith('62')
-    //     ? pembayaran.wa
-    //     : '62' + pembayaran.wa;
-    // } else {
-    // Dummy data for testing - remove when backend is ready
-    const dummyWhatsAppNumbers = {
-      1: "6289123456789",
-      2: "6289234567890",
-      3: "6289345678901",
-      4: "6289456789012",
-      5: "6289567890123",
-    };
-    whatsappNumber =
-      dummyWhatsAppNumbers[
-        pembayaran.peserta_id as keyof typeof dummyWhatsAppNumbers
-      ] || "6289123456789";
-    // }
+    if (userData.no_wa) {
+      // Ensure number starts with 62 (Indonesia country code)
+      whatsappNumber = userData.no_wa.startsWith("08")
+        ? "62" + userData.no_wa.substring(1)
+        : userData.no_wa.startsWith("62")
+        ? userData.no_wa
+        : "62" + userData.no_wa;
+    } else {
+      // Fallback to dummy number
+      whatsappNumber = "6289123456789";
+    }
 
-    const message = `Halo! Saya dari Tim Admin TE Flash Run.
+    const message = `Halo ${
+      userData.nama_lengkap
+    }! Saya dari Tim Admin TE Flash Run.
 
 Mengenai pembayaran pendaftaran Anda:
-- ID Pembayaran: #${pembayaran.id}
-- ID Peserta: #${pembayaran.peserta_id}
-- Jumlah: Rp ${pembayaran.jumlah_pembayaran.toLocaleString("id-ID")}
-- Status: ${pembayaran.status_pembayaran ? "Lunas" : "Pending"}
+• ID Peserta: #${userData.id}
+• Nama: ${userData.nama_lengkap}
+• Kategori: ${userData.tipe}K
+• Jumlah: Rp ${userData.pembayaran.jumlah_pembayaran.toLocaleString("id-ID")}
+• Status: ${userData.pembayaran.status_pembayaran ? "Lunas" : "Pending"}
 
 ${
-  pembayaran.status_pembayaran
-    ? "Terima kasih! Pembayaran Anda sudah dikonfirmasi. Kami tunggu kehadiran Anda di acara Night Run! 🏃‍♂️"
+  userData.pembayaran.status_pembayaran
+    ? "Terima kasih! Pembayaran Anda sudah dikonfirmasi.\nKami tunggu kehadiran Anda di acara Night Run! 🏃‍♂️ Salam olahraga! 💪"
     : "Mohon untuk melengkapi pembayaran atau mengirimkan bukti pembayaran yang jelas. Jika ada kendala, silakan hubungi kami."
-}
-
-Salam olahraga! 💪`;
+}`;
 
     const encodedMessage = encodeURIComponent(message);
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
@@ -277,15 +357,9 @@ Salam olahraga! 💪`;
   // Calculate stats from payment data
   const stats = {
     total: paymentData?.length || 0,
-    // Determine category based on payment amount (160000 = 5K, 180000 = 10K)
-    fiveK:
-      paymentData?.filter(
-        (item) => item.pembayaran.jumlah_pembayaran === 160000
-      ).length || 0,
-    tenK:
-      paymentData?.filter(
-        (item) => item.pembayaran.jumlah_pembayaran === 180000
-      ).length || 0,
+    // Determine category based on tipe field
+    fiveK: paymentData?.filter((item) => item.tipe === "5").length || 0,
+    tenK: paymentData?.filter((item) => item.tipe === "10").length || 0,
     paid:
       paymentData?.filter((item) => item.pembayaran.status_pembayaran === true)
         .length || 0,
@@ -495,7 +569,7 @@ Salam olahraga! 💪`;
           </Card>
         </div>
         {/* Export Section */}
-        <Card className="mb-8 hover:shadow-md transition-shadow duration-200">
+        <Card className="mb-8 hover:scale-100 hover:shadow-md transition-shadow duration-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Download className="w-5 h-5 text-vibrant-blue" />
@@ -566,22 +640,16 @@ Salam olahraga! 💪`;
               <TableBody>
                 {paymentData && paymentData.length > 0 ? (
                   paymentData.map((item) => (
-                    <TableRow key={item.pembayaran.id}>
+                    <TableRow key={item.id}>
                       <TableCell className="font-medium">
                         #{item.pembayaran.id}
                       </TableCell>
-                      <TableCell>#{item.pembayaran.peserta_id}</TableCell>
+                      <TableCell>#{item.id}</TableCell>
                       <TableCell>
                         <Badge
-                          variant={
-                            item.pembayaran.jumlah_pembayaran === 160000
-                              ? "default"
-                              : "secondary"
-                          }
+                          variant={item.tipe === "5" ? "default" : "secondary"}
                         >
-                          {item.pembayaran.jumlah_pembayaran === 160000
-                            ? "5K"
-                            : "10K"}
+                          {item.tipe}K
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -623,17 +691,16 @@ Salam olahraga! 💪`;
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() =>
-                              handleWhatsAppContact(item.pembayaran)
-                            }
+                            onClick={() => handleWhatsAppContact(item)}
                             className="text-green-600 border-green-600 hover:bg-green-50"
                           >
-                            <MessageCircle className="w-4 h-4" />
+                            <MessageCircle className="w-4 h-4 mr-1" />
+                            WA
                           </Button>
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => handleViewPayment(item.pembayaran)}
+                            onClick={() => handleViewPayment(item)}
                           >
                             <Eye className="w-4 h-4 mr-1" />
                             Lihat
@@ -679,54 +746,163 @@ Salam olahraga! 💪`;
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Detail Pembayaran</DialogTitle>
-              <DialogDescription>
-                Tinjau dan kelola status pembayaran untuk pendaftaran ini
-              </DialogDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <DialogTitle>Detail Peserta & Pembayaran</DialogTitle>
+                  <DialogDescription>
+                    {isEditing
+                      ? "Edit data peserta"
+                      : "Tinjau data peserta dan kelola pembayaran"}
+                  </DialogDescription>
+                </div>
+              </div>
             </DialogHeader>
 
-            {selectedPayment && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">
-                      ID Pembayaran
-                    </label>
-                    <p className="text-sm">{selectedPayment.id}</p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">
-                      Jumlah
-                    </label>
-                    <p className="text-sm">
-                      Rp{" "}
-                      {selectedPayment.jumlah_pembayaran.toLocaleString(
-                        "id-ID"
+            {selectedUserData && (
+              <div className="space-y-6 max-h-[70vh] overflow-y-auto">
+                {/* User Data Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold border-b pb-2">
+                    Data Peserta
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="nama">Nama Lengkap</Label>
+                      {isEditing ? (
+                        <Input
+                          id="nama"
+                          value={editFormData.nama_lengkap || ""}
+                          onChange={(e) =>
+                            handleEditInputChange(
+                              "nama_lengkap",
+                              e.target.value
+                            )
+                          }
+                        />
+                      ) : (
+                        <p className="text-sm py-2">
+                          {selectedUserData.nama_lengkap}
+                        </p>
                       )}
-                    </p>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="nik">NIK</Label>
+                      {isEditing ? (
+                        <Input
+                          id="nik"
+                          value={editFormData.nik || ""}
+                          onChange={(e) =>
+                            handleEditInputChange("nik", e.target.value)
+                          }
+                        />
+                      ) : (
+                        <p className="text-sm py-2">{selectedUserData.nik}</p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      {isEditing ? (
+                        <Input
+                          id="email"
+                          type="email"
+                          value={editFormData.email || ""}
+                          onChange={(e) =>
+                            handleEditInputChange("email", e.target.value)
+                          }
+                        />
+                      ) : (
+                        <p className="text-sm py-2">{selectedUserData.email}</p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="no_wa">No. WhatsApp</Label>
+                      {isEditing ? (
+                        <Input
+                          id="no_wa"
+                          value={editFormData.no_wa || ""}
+                          onChange={(e) =>
+                            handleEditInputChange("no_wa", e.target.value)
+                          }
+                        />
+                      ) : (
+                        <p className="text-sm py-2">{selectedUserData.no_wa}</p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="alamat">Alamat</Label>
+                      {isEditing ? (
+                        <Input
+                          id="alamat"
+                          value={editFormData.alamat || ""}
+                          onChange={(e) =>
+                            handleEditInputChange("alamat", e.target.value)
+                          }
+                        />
+                      ) : (
+                        <p className="text-sm py-2">
+                          {selectedUserData.alamat}
+                        </p>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Tanggal Lahir</Label>
+                      <p className="text-sm py-2">
+                        {selectedUserData.tanggal_lahir}
+                      </p>
+                    </div>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">
-                      Metode
-                    </label>
-                    <p className="text-sm capitalize">
-                      {selectedPayment.metode_pembayaran}
-                    </p>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">
-                      Status
-                    </label>
-                    <Badge
-                      variant={
-                        selectedPayment.status_pembayaran
-                          ? "default"
-                          : "destructive"
-                      }
-                      className="ml-2"
-                    >
-                      {selectedPayment.status_pembayaran ? "Lunas" : "Pending"}
-                    </Badge>
+                </div>
+
+                {/* Payment Data Section */}
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold border-b pb-2">
+                    Data Pembayaran
+                  </h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">
+                        ID Pembayaran
+                      </label>
+                      <p className="text-sm">
+                        {selectedUserData.pembayaran.id}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">
+                        Kategori
+                      </label>
+                      <Badge variant="secondary">
+                        {selectedUserData.tipe}K
+                      </Badge>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">
+                        Jumlah
+                      </label>
+                      <p className="text-sm">
+                        Rp{" "}
+                        {selectedUserData.pembayaran.jumlah_pembayaran.toLocaleString(
+                          "id-ID"
+                        )}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-muted-foreground">
+                        Status
+                      </label>
+                      <Badge
+                        variant={
+                          selectedUserData.pembayaran.status_pembayaran
+                            ? "default"
+                            : "destructive"
+                        }
+                        className="ml-2"
+                      >
+                        {selectedUserData.pembayaran.status_pembayaran
+                          ? "Lunas"
+                          : "Pending"}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
 
@@ -736,10 +912,10 @@ Salam olahraga! 💪`;
                     Bukti Pembayaran
                   </label>
                   <div className="mt-2">
-                    {selectedPayment.bukti_pembayaran ? (
+                    {selectedUserData.pembayaran.bukti_pembayaran ? (
                       <div className="relative">
                         <Image
-                          src={selectedPayment.bukti_pembayaran}
+                          src={selectedUserData.pembayaran.bukti_pembayaran}
                           alt="Bukti pembayaran"
                           className="rounded-lg border"
                           style={{ maxHeight: "300px", maxWidth: "100%" }}
@@ -772,32 +948,46 @@ Salam olahraga! 💪`;
             )}
 
             <DialogFooter className="flex gap-2 w-full justify-end">
-              {selectedPayment && !selectedPayment.status_pembayaran && (
+              {isEditing ? (
                 <>
+                  <Button
+                    className="h-10"
+                    variant="outline"
+                    onClick={handleEditToggle}
+                  >
+                    Batal
+                  </Button>
+                  <Button className="h-10" onClick={handleSaveEdit}>
+                    Simpan Perubahan
+                  </Button>
+                </>
+              ) : (
+                <>
+                  {selectedUserData &&
+                    !selectedUserData.pembayaran.status_pembayaran && (
+                      <Button
+                        onClick={handleUpdatePaymentStatus}
+                        disabled={updatePaymentMutation.isPending}
+                        className="bg-green-600 hover:scale-100 hover:bg-green-700"
+                      >
+                        {updatePaymentMutation.isPending ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                            Menyetujui...
+                          </>
+                        ) : (
+                          <>
+                            <Check className="w-4 h-4 mr-2" />
+                            Setujui Pembayaran
+                          </>
+                        )}
+                      </Button>
+                    )}
                   <Button
                     variant="outline"
                     onClick={() => setIsModalOpen(false)}
                   >
-                    Batal
-                  </Button>
-                  <Button
-                    onClick={handleUpdatePaymentStatus}
-                    disabled={updatePaymentMutation.isPending}
-                    className="bg-green-600
-                    hover:scale-100
-                    hover:bg-green-700"
-                  >
-                    {updatePaymentMutation.isPending ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                        Menyetujui...
-                      </>
-                    ) : (
-                      <>
-                        <Check className="w-4 h-4 mr-2" />
-                        Setujui Pembayaran
-                      </>
-                    )}
+                    Tutup
                   </Button>
                 </>
               )}

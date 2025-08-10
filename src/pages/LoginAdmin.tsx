@@ -180,7 +180,7 @@ const LoginAdmin = () => {
                   <Button
                     type="submit"
                     size="lg"
-                    className="w-full"
+                    className="w-full h-10 hover:scale-100"
                     disabled={mutation.isPending}
                   >
                     {mutation.isPending ? "Logging in..." : "Login"}
