@@ -9,13 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { ArrowLeft, CalendarIcon } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
 import {
@@ -28,7 +22,6 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
 
 const RegisterRunning = () => {
   const navigate = useNavigate();
@@ -54,11 +47,78 @@ const RegisterRunning = () => {
   });
 
   const [birthDate, setBirthDate] = useState<Date>();
+  const [birthYear, setBirthYear] = useState<string>("");
+  const [birthMonth, setBirthMonth] = useState<string>("");
+  const [birthDay, setBirthDay] = useState<string>("");
 
   const price = useMemo(
     () => (formData.tipe === 10 ? "180000" : "160000"),
     [formData.tipe]
   );
+
+  // Generate years from 1950 to current year
+  const currentYear = new Date().getFullYear();
+  const years = Array.from(
+    { length: currentYear - 1949 },
+    (_, i) => currentYear - i
+  );
+
+  // Indonesian month names
+  const months = [
+    { value: "1", label: "Januari" },
+    { value: "2", label: "Februari" },
+    { value: "3", label: "Maret" },
+    { value: "4", label: "April" },
+    { value: "5", label: "Mei" },
+    { value: "6", label: "Juni" },
+    { value: "7", label: "Juli" },
+    { value: "8", label: "Agustus" },
+    { value: "9", label: "September" },
+    { value: "10", label: "Oktober" },
+    { value: "11", label: "November" },
+    { value: "12", label: "Desember" },
+  ];
+
+  // Generate days based on selected month and year
+  const getDaysInMonth = (month: string, year: string) => {
+    if (!month || !year) return Array.from({ length: 31 }, (_, i) => i + 1);
+    const daysInMonth = new Date(parseInt(year), parseInt(month), 0).getDate();
+    return Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  };
+
+  // Update birthDate when individual components change
+  const updateBirthDate = (year: string, month: string, day: string) => {
+    if (year && month && day) {
+      const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+      setBirthDate(date);
+    } else {
+      setBirthDate(undefined);
+    }
+  };
+
+  // Handle date component changes
+  const handleYearChange = (year: string) => {
+    setBirthYear(year);
+    updateBirthDate(year, birthMonth, birthDay);
+  };
+
+  const handleMonthChange = (month: string) => {
+    setBirthMonth(month);
+    // Reset day if current day is not valid for new month
+    const daysInNewMonth = getDaysInMonth(month, birthYear);
+    const currentDay = parseInt(birthDay);
+    if (currentDay > daysInNewMonth.length) {
+      setBirthDay("");
+      updateBirthDate(birthYear, month, "");
+    } else {
+      updateBirthDate(birthYear, month, birthDay);
+    }
+  };
+
+  const handleDayChange = (day: string) => {
+    setBirthDay(day);
+    updateBirthDate(birthYear, birthMonth, day);
+  };
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -207,35 +267,66 @@ const RegisterRunning = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>Tanggal Lahir</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !birthDate && "text-muted-foreground"
-                        )}
+                  <div className="grid grid-cols-3 gap-2">
+                    {/* Day Dropdown */}
+                    <div>
+                      <Select value={birthDay} onValueChange={handleDayChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Tanggal" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getDaysInMonth(birthMonth, birthYear).map((day) => (
+                            <SelectItem key={day} value={String(day)}>
+                              {day}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Month Dropdown */}
+                    <div>
+                      <Select
+                        value={birthMonth}
+                        onValueChange={handleMonthChange}
                       >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {birthDate ? (
-                          format(birthDate, "dd/MM/yyyy")
-                        ) : (
-                          <span>Pilih tanggal lahir</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={birthDate}
-                        onSelect={setBirthDate}
-                        initialFocus
-                        disabled={(date) =>
-                          date > new Date() || date < new Date("1900-01-01")
-                        }
-                      />
-                    </PopoverContent>
-                  </Popover>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Bulan" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {months.map((month) => (
+                            <SelectItem key={month.value} value={month.value}>
+                              {month.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Year Dropdown */}
+                    <div>
+                      <Select
+                        value={birthYear}
+                        onValueChange={handleYearChange}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Tahun" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {years.map((year) => (
+                            <SelectItem key={year} value={String(year)}>
+                              {year}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  {birthDate && (
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Tanggal lahir: {format(birthDate, "dd MMMM yyyy")}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -342,7 +433,7 @@ const RegisterRunning = () => {
               <Button
                 type="submit"
                 size="lg"
-                className="w-full hover:scale-100"
+                className="w-full h-10 hover:scale-100"
                 disabled={mutation.isPending}
               >
                 {mutation.isPending ? "Submitting..." : "Submit Registration"}
