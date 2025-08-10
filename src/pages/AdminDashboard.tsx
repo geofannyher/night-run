@@ -35,13 +35,16 @@ import {
   CreditCard,
   Download,
   ZoomIn,
+  ZoomOut,
+  RotateCcw,
+  Move,
   MessageCircle,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner";
-import { Image } from "antd";
+
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
 
@@ -95,6 +98,12 @@ const AdminDashboard = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editFormData, setEditFormData] = useState<Partial<UserData>>({});
+  const [imagePreviewOpen, setImagePreviewOpen] = useState(false);
+  const [previewImageSrc, setPreviewImageSrc] = useState("");
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   // Fetch payment data from API - moved before early returns
   const {
@@ -208,6 +217,58 @@ const AdminDashboard = () => {
 
   const handleEditInputChange = (field: keyof UserData, value: string) => {
     setEditFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleImagePreview = (imageSrc: string) => {
+    setPreviewImageSrc(imageSrc);
+    setImagePreviewOpen(true);
+    setZoomLevel(1);
+    setImagePosition({ x: 0, y: 0 });
+  };
+
+  const handleZoomIn = () => {
+    setZoomLevel((prev) => Math.min(prev + 0.5, 5));
+  };
+
+  const handleZoomOut = () => {
+    setZoomLevel((prev) => Math.max(prev - 0.5, 0.5));
+  };
+
+  const handleResetZoom = () => {
+    setZoomLevel(1);
+    setImagePosition({ x: 0, y: 0 });
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (zoomLevel > 1) {
+      setIsDragging(true);
+      setDragStart({
+        x: e.clientX - imagePosition.x,
+        y: e.clientY - imagePosition.y,
+      });
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && zoomLevel > 1) {
+      setImagePosition({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y,
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    if (e.deltaY < 0) {
+      handleZoomIn();
+    } else {
+      handleZoomOut();
+    }
   };
 
   const handleSaveEdit = async () => {
@@ -438,9 +499,6 @@ Terima kasih! 🙏`
                 <p className="text-3xl font-bold text-gray-900">
                   {stats.total}
                 </p>
-                <p className="text-xs text-green-600 font-medium mt-1">
-                  ↗ 8.2% <span className="text-gray-500">since last month</span>
-                </p>
               </div>
             </div>
           </Card>
@@ -460,9 +518,6 @@ Terima kasih! 🙏`
                 <p className="text-3xl font-bold text-gray-900">
                   {analyticsData?.jumlahSuccessTransaksi || 0}
                 </p>
-                <p className="text-xs text-green-600 font-medium mt-1">
-                  ↗ 3.4% <span className="text-gray-500">since last month</span>
-                </p>
               </div>
             </div>
           </Card>
@@ -479,9 +534,6 @@ Terima kasih! 🙏`
                 <p className="text-gray-600 text-sm font-medium mb-1">Users</p>
                 <p className="text-3xl font-bold text-gray-900">
                   {stats.total}
-                </p>
-                <p className="text-xs text-gray-500 font-medium mt-1">
-                  <span className="text-gray-500">since last month</span>
                 </p>
               </div>
             </div>
@@ -506,9 +558,6 @@ Terima kasih! 🙏`
                   )}
                   K
                 </p>
-                <p className="text-xs text-red-600 font-medium mt-1">
-                  ↓ 1.2% <span className="text-gray-500">since last month</span>
-                </p>
               </div>
             </div>
           </Card>
@@ -530,9 +579,6 @@ Terima kasih! 🙏`
                 <p className="text-3xl font-bold text-gray-900">
                   {stats.fiveK}
                 </p>
-                <p className="text-xs text-green-600 font-medium mt-1">
-                  ↗ 5.1% <span className="text-gray-500">since last month</span>
-                </p>
               </div>
             </div>
           </Card>
@@ -549,9 +595,6 @@ Terima kasih! 🙏`
                   Pelari 10K
                 </p>
                 <p className="text-3xl font-bold text-gray-900">{stats.tenK}</p>
-                <p className="text-xs text-green-600 font-medium mt-1">
-                  ↗ 2.8% <span className="text-gray-500">since last month</span>
-                </p>
               </div>
             </div>
           </Card>
@@ -569,9 +612,6 @@ Terima kasih! 🙏`
                 </p>
                 <p className="text-3xl font-bold text-gray-900">
                   {analyticsData?.jumlahPendingTransaksi || 0}
-                </p>
-                <p className="text-xs text-orange-600 font-medium mt-1">
-                  ↑ 0.2% <span className="text-gray-500">since last month</span>
                 </p>
               </div>
             </div>
@@ -603,7 +643,7 @@ Terima kasih! 🙏`
               <Button
                 onClick={handleExportData}
                 disabled={isExporting || !isAuthenticated}
-                className="lg:ml-4 lg:min-w-[140px]"
+                className="lg:ml-4 lg:min-w-[140px] h-10"
                 size="lg"
               >
                 {isExporting ? (
@@ -923,20 +963,26 @@ Terima kasih! 🙏`
                   <div className="mt-2">
                     {selectedUserData.pembayaran.bukti_pembayaran ? (
                       <div className="relative">
-                        <Image
-                          src={selectedUserData.pembayaran.bukti_pembayaran}
-                          alt="Bukti pembayaran"
-                          className="rounded-lg border"
-                          style={{ maxHeight: "300px", maxWidth: "100%" }}
-                          preview={{
-                            mask: (
-                              <div className="flex items-center justify-center">
-                                <ZoomIn className="w-6 h-6 text-white mr-2" />
-                                <span className="text-white">Preview</span>
-                              </div>
-                            ),
-                          }}
-                        />
+                        <div
+                          className="relative cursor-pointer group rounded-lg border overflow-hidden"
+                          onClick={() =>
+                            handleImagePreview(
+                              selectedUserData.pembayaran.bukti_pembayaran
+                            )
+                          }
+                        >
+                          <img
+                            src={selectedUserData.pembayaran.bukti_pembayaran}
+                            alt="Bukti pembayaran"
+                            className="w-full h-auto max-h-[300px] object-contain"
+                          />
+                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                            <div className="flex items-center justify-center text-white">
+                              <ZoomIn className="w-6 h-6 mr-2" />
+                              <span>Preview</span>
+                            </div>
+                          </div>
+                        </div>
                         <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
                           <ZoomIn className="w-3 h-3" />
                           <span>
@@ -973,11 +1019,12 @@ Terima kasih! 🙏`
               ) : (
                 <>
                   {selectedUserData &&
-                    !selectedUserData.pembayaran.status_pembayaran && (
+                    !selectedUserData.pembayaran.status_pembayaran &&
+                    selectedUserData.pembayaran.bukti_pembayaran && (
                       <Button
                         onClick={handleUpdatePaymentStatus}
                         disabled={updatePaymentMutation.isPending}
-                        className="bg-green-600 hover:scale-100 hover:bg-green-700"
+                        className="bg-vibrant-lime h-10 hover:scale-100 hover:bg-vibrant-lime/80"
                       >
                         {updatePaymentMutation.isPending ? (
                           <>
@@ -994,6 +1041,7 @@ Terima kasih! 🙏`
                     )}
                   <Button
                     variant="outline"
+                    className="h-10"
                     onClick={() => setIsModalOpen(false)}
                   >
                     Tutup
@@ -1001,6 +1049,102 @@ Terima kasih! 🙏`
                 </>
               )}
             </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Custom Image Preview Dialog with Zoom */}
+        <Dialog open={imagePreviewOpen} onOpenChange={setImagePreviewOpen}>
+          <DialogContent className="max-w-6xl max-h-[95vh] p-0">
+            <div className="relative w-full h-[90vh] overflow-hidden bg-black/5 rounded-lg">
+              {/* Zoom Controls */}
+              <div className="absolute top-4 left-4 z-10 flex gap-2">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="bg-white/90 hover:bg-white"
+                  onClick={handleZoomIn}
+                  disabled={zoomLevel >= 5}
+                >
+                  <ZoomIn className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="bg-white/90 hover:bg-white"
+                  onClick={handleZoomOut}
+                  disabled={zoomLevel <= 0.5}
+                >
+                  <ZoomOut className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="bg-white/90 hover:bg-white"
+                  onClick={handleResetZoom}
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </Button>
+              </div>
+
+              {/* Close Button */}
+              <Button
+                variant="outline"
+                size="icon"
+                className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white"
+                onClick={() => setImagePreviewOpen(false)}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+
+              {/* Zoom Level Indicator */}
+              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
+                <div className="bg-white/90 px-3 py-1 rounded-full text-sm font-medium">
+                  {Math.round(zoomLevel * 100)}%
+                </div>
+              </div>
+
+              {/* Image Container */}
+              <div
+                className="w-full h-full flex items-center justify-center cursor-move overflow-hidden"
+                onWheel={handleWheel}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                style={{
+                  cursor:
+                    zoomLevel > 1
+                      ? isDragging
+                        ? "grabbing"
+                        : "grab"
+                      : "default",
+                }}
+              >
+                <img
+                  src={previewImageSrc}
+                  alt="Preview bukti pembayaran"
+                  className="max-w-none transition-transform duration-200 select-none"
+                  style={{
+                    transform: `scale(${zoomLevel}) translate(${
+                      imagePosition.x / zoomLevel
+                    }px, ${imagePosition.y / zoomLevel}px)`,
+                    maxHeight: zoomLevel <= 1 ? "80vh" : "none",
+                    maxWidth: zoomLevel <= 1 ? "100%" : "none",
+                  }}
+                  draggable={false}
+                />
+              </div>
+
+              {/* Instructions */}
+              {zoomLevel > 1 && (
+                <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-10">
+                  <div className="bg-white/90 px-3 py-2 rounded-lg text-xs text-center flex items-center gap-2">
+                    <Move className="w-3 h-3" />
+                    <span>Drag to pan • Scroll to zoom</span>
+                  </div>
+                </div>
+              )}
+            </div>
           </DialogContent>
         </Dialog>
       </div>
