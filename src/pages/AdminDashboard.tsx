@@ -34,11 +34,14 @@ import {
   DollarSign,
   CreditCard,
   Download,
+  ZoomIn,
+  MessageCircle,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner";
+import { Image } from "antd";
 
 interface Pembayaran {
   id: number;
@@ -50,6 +53,8 @@ interface Pembayaran {
   createdAt: string;
   updatedAt: string;
   deletedAt: string;
+  // TODO: Add when backend implements WhatsApp field
+  // wa?: string; // WhatsApp number like "089123456789"
 }
 
 interface PaymentData {
@@ -172,6 +177,55 @@ const AdminDashboard = () => {
     if (selectedPayment) {
       updatePaymentMutation.mutate(selectedPayment.id);
     }
+  };
+
+  const handleWhatsAppContact = (pembayaran: Pembayaran) => {
+    // Use WhatsApp number from API if available, otherwise use dummy data
+    let whatsappNumber: string;
+
+    // TODO: Uncomment this when backend adds "wa" field to the response
+    // if (pembayaran.wa) {
+    //   // Ensure number starts with 62 (Indonesia country code)
+    //   whatsappNumber = pembayaran.wa.startsWith('08')
+    //     ? '62' + pembayaran.wa.substring(1)
+    //     : pembayaran.wa.startsWith('62')
+    //     ? pembayaran.wa
+    //     : '62' + pembayaran.wa;
+    // } else {
+    // Dummy data for testing - remove when backend is ready
+    const dummyWhatsAppNumbers = {
+      1: "6289123456789",
+      2: "6289234567890",
+      3: "6289345678901",
+      4: "6289456789012",
+      5: "6289567890123",
+    };
+    whatsappNumber =
+      dummyWhatsAppNumbers[
+        pembayaran.peserta_id as keyof typeof dummyWhatsAppNumbers
+      ] || "6289123456789";
+    // }
+
+    const message = `Halo! Saya dari Tim Admin TE Flash Run.
+
+Mengenai pembayaran pendaftaran Anda:
+- ID Pembayaran: #${pembayaran.id}
+- ID Peserta: #${pembayaran.peserta_id}
+- Jumlah: Rp ${pembayaran.jumlah_pembayaran.toLocaleString("id-ID")}
+- Status: ${pembayaran.status_pembayaran ? "Lunas" : "Pending"}
+
+${
+  pembayaran.status_pembayaran
+    ? "Terima kasih! Pembayaran Anda sudah dikonfirmasi. Kami tunggu kehadiran Anda di acara Night Run! 🏃‍♂️"
+    : "Mohon untuk melengkapi pembayaran atau mengirimkan bukti pembayaran yang jelas. Jika ada kendala, silakan hubungi kami."
+}
+
+Salam olahraga! 💪`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+
+    window.open(whatsappUrl, "_blank");
   };
 
   // Export participants data
@@ -565,14 +619,26 @@ const AdminDashboard = () => {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleViewPayment(item.pembayaran)}
-                        >
-                          <Eye className="w-4 h-4 mr-1" />
-                          Lihat
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              handleWhatsAppContact(item.pembayaran)
+                            }
+                            className="text-green-600 border-green-600 hover:bg-green-50"
+                          >
+                            <MessageCircle className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleViewPayment(item.pembayaran)}
+                          >
+                            <Eye className="w-4 h-4 mr-1" />
+                            Lihat
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))
@@ -671,12 +737,28 @@ const AdminDashboard = () => {
                   </label>
                   <div className="mt-2">
                     {selectedPayment.bukti_pembayaran ? (
-                      <img
-                        src={selectedPayment.bukti_pembayaran}
-                        alt="Bukti pembayaran"
-                        className="max-w-full h-auto rounded-lg border"
-                        style={{ maxHeight: "300px" }}
-                      />
+                      <div className="relative">
+                        <Image
+                          src={selectedPayment.bukti_pembayaran}
+                          alt="Bukti pembayaran"
+                          className="rounded-lg border"
+                          style={{ maxHeight: "300px", maxWidth: "100%" }}
+                          preview={{
+                            mask: (
+                              <div className="flex items-center justify-center">
+                                <ZoomIn className="w-6 h-6 text-white mr-2" />
+                                <span className="text-white">Preview</span>
+                              </div>
+                            ),
+                          }}
+                        />
+                        <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+                          <ZoomIn className="w-3 h-3" />
+                          <span>
+                            Klik gambar untuk preview dengan zoom lengkap
+                          </span>
+                        </div>
+                      </div>
                     ) : (
                       <div className="p-4 border-2 border-dashed border-muted-foreground/25 rounded-lg text-center">
                         <p className="text-muted-foreground text-sm">
