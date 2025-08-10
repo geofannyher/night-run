@@ -299,13 +299,16 @@ Mengenai pembayaran pendaftaran Anda:
 ${
   userData.pembayaran.status_pembayaran
     ? "Terima kasih! Pembayaran Anda sudah dikonfirmasi.\nKami tunggu kehadiran Anda di acara Night Run! 🏃‍♂️ Salam olahraga! 💪"
-    : `Maaf, pembayaran Anda belum kami terima. Mohon untuk melengkapi pembayaran melalui link berikut:
+    : !userData.pembayaran.status_pembayaran &&
+      !userData.pembayaran.bukti_pembayaran
+    ? `Maaf, pembayaran Anda belum kami terima. Mohon untuk melengkapi pembayaran melalui link berikut:
 
 https://night-run.vercel.app/pembayaran/pendaftaran?id_pembayaran=${userData.pembayaran.id}&email=${userData.email}&category=${userData.tipe}
 
 Jika sudah melakukan pembayaran, mohon kirimkan bukti pembayaran yang jelas. Jika ada kendala, silakan hubungi kami.
 
 Terima kasih! 🙏`
+    : "Terima kasih telah mengirimkan bukti pembayaran. Kami sedang memproses dan akan mengkonfirmasi pembayaran Anda segera. Mohon bersabar menunggu konfirmasi dari tim kami. 🙏"
 }`;
 
     const encodedMessage = encodeURIComponent(message);
