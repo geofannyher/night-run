@@ -299,7 +299,13 @@ Mengenai pembayaran pendaftaran Anda:
 ${
   userData.pembayaran.status_pembayaran
     ? "Terima kasih! Pembayaran Anda sudah dikonfirmasi.\nKami tunggu kehadiran Anda di acara Night Run! 🏃‍♂️ Salam olahraga! 💪"
-    : "Mohon untuk melengkapi pembayaran atau mengirimkan bukti pembayaran yang jelas. Jika ada kendala, silakan hubungi kami."
+    : `Maaf, pembayaran Anda belum kami terima. Mohon untuk melengkapi pembayaran melalui link berikut:
+
+${window.location.origin}/pembayaran/pendaftaran?id_pembayaran=${userData.pembayaran.id}&email=${userData.email}&category=${userData.tipe}
+
+Jika sudah melakukan pembayaran, mohon kirimkan bukti pembayaran yang jelas. Jika ada kendala, silakan hubungi kami.
+
+Terima kasih! 🙏`
 }`;
 
     const encodedMessage = encodeURIComponent(message);

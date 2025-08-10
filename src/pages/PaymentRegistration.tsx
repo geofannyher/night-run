@@ -1,5 +1,5 @@
-import { useLocation, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -19,10 +19,32 @@ const PaymentRegistration = () => {
   const location = useLocation() as {
     state: { username?: string; id_pembayaran?: string };
   };
+  const [searchParams] = useSearchParams();
+
+  // Get data from location.state (from registration flow) or URL params (from WhatsApp link)
   const { username = "", id_pembayaran = "" } = location.state || {};
+  const emailFromParams = searchParams.get("email") || "";
+  const idPembayaranFromParams = searchParams.get("id_pembayaran") || "";
+  const categoryFromParams = searchParams.get("category") || "";
+
   const [imageFile, setImageFile] = useState<File | null>(null);
-  const [user, setUser] = useState(username);
-  const [paymentId, setPaymentId] = useState(id_pembayaran);
+  const [user, setUser] = useState("");
+  const [paymentId, setPaymentId] = useState("");
+  const [category, setCategory] = useState("");
+
+  // Initialize form data on component mount
+  useEffect(() => {
+    // Priority: URL params (from WhatsApp) > location.state (from registration)
+    setUser(emailFromParams || username);
+    setPaymentId(idPembayaranFromParams || id_pembayaran);
+    setCategory(categoryFromParams);
+  }, [
+    emailFromParams,
+    username,
+    idPembayaranFromParams,
+    id_pembayaran,
+    categoryFromParams,
+  ]);
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -96,9 +118,15 @@ const PaymentRegistration = () => {
                   <span>Andy Reza Zulkarnaen</span>
                 </div>
                 <div className="flex justify-between">
+                  <span className="font-medium">Kategori:</span>
+                  <span className="font-semibold">
+                    {category ? `${category}K` : "5K"}
+                  </span>
+                </div>
+                <div className="flex justify-between">
                   <span className="font-medium">Jumlah Nominal:</span>
                   <span className="text-vibrant-lime font-semibold">
-                    Rp 160.000
+                    {category === "10" ? "Rp 180.000" : "Rp 160.000"}
                   </span>
                 </div>
               </div>
