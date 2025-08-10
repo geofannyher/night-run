@@ -9,32 +9,65 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Shield, ArrowLeft, Mail, Lock, CheckCircle2 } from "lucide-react";
+import {
+  Shield,
+  ArrowLeft,
+  Mail,
+  Lock,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { useMutation } from "@tanstack/react-query";
+import axios from "axios";
 
 const LoginAdmin = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    username: "",
+    user: "",
     password: "",
+  });
+  const [showPassword, setShowPassword] = useState(false);
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      try {
+        const response = await axios.post(
+          "https://event-be-one.vercel.app/user/login",
+          formData,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        return response.data;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          const message = error.response?.data?.message || error.message;
+          throw new Error(message || "Login failed");
+        }
+        throw new Error("Login failed");
+      }
+    },
+    onSuccess: (data: any) => {
+      toast.success("Login successful! Redirecting to dashboard...");
+      // Store user data if needed
+      localStorage.setItem("admin_user", JSON.stringify(data.data));
+      setTimeout(() => {
+        navigate("/admin-dashboard");
+      }, 1000);
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Invalid credentials");
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (
-      formData.username === "admin@running.com" &&
-      formData.password === "admin123"
-    ) {
-      toast.success("Login successful! Redirecting to dashboard...");
-      setTimeout(() => {
-        navigate("/admin-dashboard");
-      }, 1000);
-    } else {
-      toast.error(
-        "Invalid username or password. Try admin@running.com / admin123"
-      );
-    }
+    mutation.mutate();
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -98,15 +131,15 @@ const LoginAdmin = () => {
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="username">Username</Label>
+                    <Label htmlFor="user">Username</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
-                        id="username"
-                        type="username"
-                        value={formData.username}
+                        id="user"
+                        type="text"
+                        value={formData.user}
                         onChange={(e) =>
-                          handleInputChange("username", e.target.value)
+                          handleInputChange("user", e.target.value)
                         }
                         placeholder="Enter admin username"
                         className="pl-10"
@@ -121,20 +154,36 @@ const LoginAdmin = () => {
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="password"
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         value={formData.password}
                         onChange={(e) =>
                           handleInputChange("password", e.target.value)
                         }
                         placeholder="Enter admin password"
-                        className="pl-10"
+                        className="pl-10 pr-10"
                         required
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
                     </div>
                   </div>
 
-                  <Button type="submit" size="lg" className="w-full">
-                    Login
+                  <Button
+                    type="submit"
+                    size="lg"
+                    className="w-full"
+                    disabled={mutation.isPending}
+                  >
+                    {mutation.isPending ? "Logging in..." : "Login"}
                   </Button>
                 </form>
               </CardContent>

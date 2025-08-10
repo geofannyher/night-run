@@ -24,7 +24,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="bg-muted/30">
+    <footer className="bg-muted/30" role="contentinfo">
       <div className="max-w-7xl mx-auto px-6 py-16">
         {/* Top section: brand + link columns */}
         <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">

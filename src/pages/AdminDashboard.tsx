@@ -1,64 +1,243 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { LogOut, Users, Trophy } from "lucide-react";
-import { Link } from "react-router-dom";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  LogOut,
+  Users,
+  Trophy,
+  Eye,
+  Check,
+  X,
+  DollarSign,
+  CreditCard,
+  Download,
+} from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import { toast } from "sonner";
+
+interface Pembayaran {
+  id: number;
+  peserta_id: number;
+  metode_pembayaran: string;
+  jumlah_pembayaran: number;
+  bukti_pembayaran: string | null;
+  status_pembayaran: boolean;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string;
+}
+
+interface PaymentData {
+  pembayaran: Pembayaran;
+}
 
 const AdminDashboard = () => {
-  // Mock data for registered users
-  const registrations = [
-    {
-      id: 1,
-      name: "John Doe",
-      email: "john.doe@email.com",
-      phone: "+628123456789",
-      city: "Jakarta",
-      category: "5k",
-      registeredAt: "2025-01-15"
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      email: "jane.smith@email.com", 
-      phone: "+628987654321",
-      city: "Surabaya",
-      category: "10k",
-      registeredAt: "2025-01-14"
-    },
-    {
-      id: 3,
-      name: "Ahmad Rahman",
-      email: "ahmad.rahman@email.com",
-      phone: "+628111222333",
-      city: "Bandung",
-      category: "5k",
-      registeredAt: "2025-01-13"
-    },
-    {
-      id: 4,
-      name: "Sarah Wilson",
-      email: "sarah.wilson@email.com",
-      phone: "+628444555666",
-      city: "Yogyakarta",
-      category: "10k", 
-      registeredAt: "2025-01-12"
-    },
-    {
-      id: 5,
-      name: "Michael Chen",
-      email: "michael.chen@email.com",
-      phone: "+628777888999",
-      city: "Medan",
-      category: "5k",
-      registeredAt: "2025-01-11"
-    }
-  ];
+  const { user, isLoading, logout, isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
+  const [selectedPayment, setSelectedPayment] = useState<Pembayaran | null>(
+    null
+  );
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
+  // Fetch payment data from API - moved before early returns
+  const {
+    data: paymentData,
+    isLoading: isPaymentLoading,
+    error,
+  } = useQuery({
+    queryKey: ["payments"],
+    queryFn: async () => {
+      try {
+        const response = await axios.get(
+          "https://event-be-one.vercel.app/peserta/list"
+        );
+        return response.data.data as PaymentData[];
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          throw new Error(
+            error.response?.data?.message || "Failed to fetch data"
+          );
+        }
+        throw new Error("Failed to fetch data");
+      }
+    },
+    enabled: isAuthenticated, // Only run query when authenticated
+  });
+
+  // Fetch analytics data from API
+  const {
+    data: analyticsData,
+    isLoading: isAnalyticsLoading,
+    error: analyticsError,
+  } = useQuery({
+    queryKey: ["analytics"],
+    queryFn: async () => {
+      try {
+        const response = await axios.get(
+          "https://event-be-one.vercel.app/pembayaran/analitik"
+        );
+        return response.data.data;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          throw new Error(
+            error.response?.data?.message || "Failed to fetch analytics data"
+          );
+        }
+        throw new Error("Failed to fetch analytics data");
+      }
+    },
+    enabled: isAuthenticated, // Only run query when authenticated
+  });
+
+  // Update payment status mutation - moved before early returns
+  const updatePaymentMutation = useMutation({
+    mutationFn: async (id_pembayaran: number) => {
+      try {
+        const response = await axios.put(
+          "https://event-be-one.vercel.app/pembayaran/update-status",
+          {
+            id_pembayaran,
+          }
+        );
+        return response.data;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          throw new Error(
+            error.response?.data?.message || "Failed to update payment status"
+          );
+        }
+        throw new Error("Failed to update payment status");
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+      toast.success("Status pembayaran berhasil diperbarui");
+      setIsModalOpen(false);
+      setSelectedPayment(null);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Gagal memperbarui status pembayaran");
+    },
+  });
+
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vibrant-lime mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Memverifikasi autentikasi...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // If not authenticated, the hook will redirect automatically
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  const handleViewPayment = (pembayaran: Pembayaran) => {
+    setSelectedPayment(pembayaran);
+    setIsModalOpen(true);
+  };
+
+  const handleUpdatePaymentStatus = () => {
+    if (selectedPayment) {
+      updatePaymentMutation.mutate(selectedPayment.id);
+    }
+  };
+
+  // Export participants data
+  const handleExportData = async () => {
+    setIsExporting(true);
+    try {
+      const response = await axios.get(
+        "https://event-be-one.vercel.app/peserta/export",
+        {
+          responseType: "blob", // Important for file downloads
+        }
+      );
+
+      // Create blob link to download
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+
+      // Set filename - you can customize this based on response headers if available
+      const contentDisposition = response.headers["content-disposition"];
+      let filename = "participants_export.xlsx"; // default filename
+
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+        if (filenameMatch) {
+          filename = filenameMatch[1];
+        }
+      }
+
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      toast.success("Data peserta berhasil diekspor!");
+    } catch (error) {
+      console.error("Export error:", error);
+      if (axios.isAxiosError(error)) {
+        toast.error(error.response?.data?.message || "Gagal mengekspor data");
+      } else {
+        toast.error("Gagal mengekspor data");
+      }
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  // Calculate stats from payment data
   const stats = {
-    total: registrations.length,
-    fiveK: registrations.filter(r => r.category === "5k").length,
-    tenK: registrations.filter(r => r.category === "10k").length
+    total: paymentData?.length || 0,
+    // Determine category based on payment amount (160000 = 5K, 180000 = 10K)
+    fiveK:
+      paymentData?.filter(
+        (item) => item.pembayaran.jumlah_pembayaran === 160000
+      ).length || 0,
+    tenK:
+      paymentData?.filter(
+        (item) => item.pembayaran.jumlah_pembayaran === 180000
+      ).length || 0,
+    paid:
+      paymentData?.filter((item) => item.pembayaran.status_pembayaran === true)
+        .length || 0,
+    pending:
+      paymentData?.filter((item) => item.pembayaran.status_pembayaran === false)
+        .length || 0,
   };
 
   return (
@@ -67,98 +246,482 @@ const AdminDashboard = () => {
       <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-black">
-              ADMIN <span className="text-vibrant-blue">DASHBOARD</span>
-            </h1>
-            <Link to="/">
-              <Button variant="outline" size="sm">
+            <div>
+              <h1 className="text-2xl font-black">
+                DASBOR <span className="text-vibrant-lime">ADMIN</span>
+              </h1>
+              {user && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  Selamat datang kembali, {user.name}
+                </p>
+              )}
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={logout}>
                 <LogOut className="w-4 h-4 mr-2" />
-                Logout
+                Keluar
               </Button>
-            </Link>
+            </div>
           </div>
         </div>
       </header>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Loading state */}
+        {(isPaymentLoading || isAnalyticsLoading) && (
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-vibrant-lime"></div>
+            <span className="ml-2 text-muted-foreground">Memuat data...</span>
+          </div>
+        )}
+
+        {/* Error state */}
+        {(error || analyticsError) && (
+          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 mb-6">
+            <p className="text-destructive">
+              Gagal memuat data. Silakan coba lagi.
+            </p>
+          </div>
+        )}
+
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Total Registrations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-2">
-                <Users className="w-5 h-5 text-vibrant-blue" />
-                <span className="text-3xl font-bold">{stats.total}</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Total Registrations */}
+          <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-all duration-200 p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <Users className="w-4 h-4 text-gray-600" />
+                  </div>
+                </div>
+                <p className="text-gray-600 text-sm font-medium mb-1">
+                  Total Pendaftaran
+                </p>
+                <p className="text-3xl font-bold text-gray-900">
+                  {stats.total}
+                </p>
+                <p className="text-xs text-green-600 font-medium mt-1">
+                  ↗ 8.2% <span className="text-gray-500">since last month</span>
+                </p>
               </div>
-            </CardContent>
+            </div>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">5K Runners</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-green-500" />
-                <span className="text-3xl font-bold">{stats.fiveK}</span>
+          {/* Approved Payments */}
+          <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-all duration-200 p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                    <Check className="w-4 h-4 text-green-600" />
+                  </div>
+                </div>
+                <p className="text-gray-600 text-sm font-medium mb-1">
+                  Approved
+                </p>
+                <p className="text-3xl font-bold text-gray-900">
+                  {analyticsData?.jumlahSuccessTransaksi || 0}
+                </p>
+                <p className="text-xs text-green-600 font-medium mt-1">
+                  ↗ 3.4% <span className="text-gray-500">since last month</span>
+                </p>
               </div>
-            </CardContent>
+            </div>
           </Card>
 
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">10K Runners</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-2">
-                <Trophy className="w-5 h-5 text-orange-500" />
-                <span className="text-3xl font-bold">{stats.tenK}</span>
+          {/* Total Users (Participants) */}
+          <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-all duration-200 p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                    <Trophy className="w-4 h-4 text-blue-600" />
+                  </div>
+                </div>
+                <p className="text-gray-600 text-sm font-medium mb-1">Users</p>
+                <p className="text-3xl font-bold text-gray-900">
+                  {stats.total}
+                </p>
+                <p className="text-xs text-gray-500 font-medium mt-1">
+                  <span className="text-gray-500">since last month</span>
+                </p>
               </div>
-            </CardContent>
+            </div>
+          </Card>
+
+          {/* Revenue */}
+          <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-all duration-200 p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                    <DollarSign className="w-4 h-4 text-purple-600" />
+                  </div>
+                </div>
+                <p className="text-gray-600 text-sm font-medium mb-1">
+                  Revenue
+                </p>
+                <p className="text-3xl font-bold text-gray-900">
+                  {Math.floor(
+                    (analyticsData?.totalPendapatan?._sum?.jumlah_pembayaran ||
+                      0) / 1000
+                  )}
+                  K
+                </p>
+                <p className="text-xs text-red-600 font-medium mt-1">
+                  ↓ 1.2% <span className="text-gray-500">since last month</span>
+                </p>
+              </div>
+            </div>
           </Card>
         </div>
 
-        {/* Registrations Table */}
-        <Card>
+        {/* Additional Stats Cards Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+          <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-all duration-200 p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                    <Trophy className="w-4 h-4 text-green-600" />
+                  </div>
+                </div>
+                <p className="text-gray-600 text-sm font-medium mb-1">
+                  Pelari 5K
+                </p>
+                <p className="text-3xl font-bold text-gray-900">
+                  {stats.fiveK}
+                </p>
+                <p className="text-xs text-green-600 font-medium mt-1">
+                  ↗ 5.1% <span className="text-gray-500">since last month</span>
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-all duration-200 p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <Trophy className="w-4 h-4 text-orange-600" />
+                  </div>
+                </div>
+                <p className="text-gray-600 text-sm font-medium mb-1">
+                  Pelari 10K
+                </p>
+                <p className="text-3xl font-bold text-gray-900">{stats.tenK}</p>
+                <p className="text-xs text-green-600 font-medium mt-1">
+                  ↗ 2.8% <span className="text-gray-500">since last month</span>
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="bg-white border-0 shadow-sm hover:shadow-md transition-all duration-200 p-6">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
+                    <X className="w-4 h-4 text-orange-600" />
+                  </div>
+                </div>
+                <p className="text-gray-600 text-sm font-medium mb-1">
+                  Pending
+                </p>
+                <p className="text-3xl font-bold text-gray-900">
+                  {analyticsData?.jumlahPendingTransaksi || 0}
+                </p>
+                <p className="text-xs text-orange-600 font-medium mt-1">
+                  ↑ 0.2% <span className="text-gray-500">since last month</span>
+                </p>
+              </div>
+            </div>
+          </Card>
+        </div>
+        {/* Export Section */}
+        <Card className="mb-8 hover:shadow-md transition-shadow duration-200">
           <CardHeader>
-            <CardTitle>Event Registrations</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-vibrant-blue" />
+              Ekspor Data Peserta
+            </CardTitle>
             <CardDescription>
-              List of all participants registered for the running event
+              Unduh daftar lengkap semua peserta terdaftar beserta detail
+              pembayaran dalam format Excel
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div className="flex-1">
+                <p className="text-sm text-muted-foreground mb-2">
+                  Ekspor meliputi: Detail peserta, status pembayaran, tanggal
+                  pendaftaran, dan informasi kategori
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Format file: Excel (.xlsx) • Diperbarui secara real-time
+                </p>
+              </div>
+              <Button
+                onClick={handleExportData}
+                disabled={isExporting || !isAuthenticated}
+                className="lg:ml-4 lg:min-w-[140px]"
+                size="lg"
+              >
+                {isExporting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                    Mengekspor...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4 mr-2" />
+                    Ekspor Data
+                  </>
+                )}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Payments Table */}
+        <Card className="hover:shadow-md transition-shadow duration-200">
+          <CardHeader>
+            <CardTitle>Catatan Pembayaran</CardTitle>
+            <CardDescription>
+              Daftar semua catatan pembayaran untuk acara lari
             </CardDescription>
           </CardHeader>
           <CardContent className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="min-w-[120px]">Name</TableHead>
-                  <TableHead className="min-w-[200px]">Email</TableHead>
-                  <TableHead className="min-w-[140px]">Phone</TableHead>
-                  <TableHead className="min-w-[100px]">City</TableHead>
-                  <TableHead className="min-w-[80px]">Category</TableHead>
-                  <TableHead className="min-w-[120px]">Registered Date</TableHead>
+                  <TableHead className="min-w-[100px]">ID Pembayaran</TableHead>
+                  <TableHead className="min-w-[120px]">ID Peserta</TableHead>
+                  <TableHead className="min-w-[80px]">Kategori</TableHead>
+                  <TableHead className="min-w-[120px]">Jumlah</TableHead>
+                  <TableHead className="min-w-[100px]">Metode</TableHead>
+                  <TableHead className="min-w-[100px]">Status</TableHead>
+                  <TableHead className="min-w-[140px]">
+                    Tanggal Dibuat
+                  </TableHead>
+                  <TableHead className="min-w-[100px]">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {registrations.map((registration) => (
-                  <TableRow key={registration.id}>
-                    <TableCell className="font-medium">{registration.name}</TableCell>
-                    <TableCell>{registration.email}</TableCell>
-                    <TableCell>{registration.phone}</TableCell>
-                    <TableCell>{registration.city}</TableCell>
-                    <TableCell>
-                      <Badge variant={registration.category === "5k" ? "default" : "secondary"}>
-                        {registration.category.toUpperCase()}
-                      </Badge>
+                {paymentData && paymentData.length > 0 ? (
+                  paymentData.map((item) => (
+                    <TableRow key={item.pembayaran.id}>
+                      <TableCell className="font-medium">
+                        #{item.pembayaran.id}
+                      </TableCell>
+                      <TableCell>#{item.pembayaran.peserta_id}</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            item.pembayaran.jumlah_pembayaran === 160000
+                              ? "default"
+                              : "secondary"
+                          }
+                        >
+                          {item.pembayaran.jumlah_pembayaran === 160000
+                            ? "5K"
+                            : "10K"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        Rp{" "}
+                        {item.pembayaran.jumlah_pembayaran.toLocaleString(
+                          "id-ID"
+                        )}
+                      </TableCell>
+                      <TableCell className="capitalize">
+                        {item.pembayaran.metode_pembayaran}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            item.pembayaran.status_pembayaran
+                              ? "default"
+                              : "destructive"
+                          }
+                        >
+                          {item.pembayaran.status_pembayaran
+                            ? "Lunas"
+                            : "Pending"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {new Date(item.pembayaran.createdAt).toLocaleDateString(
+                          "id-ID",
+                          {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewPayment(item.pembayaran)}
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          Lihat
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={8}
+                      className="text-center py-12 text-muted-foreground"
+                    >
+                      {isPaymentLoading ? (
+                        <div className="flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-vibrant-lime mr-2"></div>
+                          Memuat catatan pembayaran...
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center">
+                          <div className="w-12 h-12 bg-muted/20 rounded-full flex items-center justify-center mb-3">
+                            <Users className="w-6 h-6 text-muted-foreground" />
+                          </div>
+                          <p className="font-medium mb-1">
+                            Tidak ada catatan pembayaran ditemukan
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Catatan pembayaran akan muncul di sini setelah
+                            peserta mulai mendaftar
+                          </p>
+                        </div>
+                      )}
                     </TableCell>
-                    <TableCell>{registration.registeredAt}</TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </CardContent>
         </Card>
+
+        {/* Payment Modal */}
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Detail Pembayaran</DialogTitle>
+              <DialogDescription>
+                Tinjau dan kelola status pembayaran untuk pendaftaran ini
+              </DialogDescription>
+            </DialogHeader>
+
+            {selectedPayment && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">
+                      ID Pembayaran
+                    </label>
+                    <p className="text-sm">{selectedPayment.id}</p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">
+                      Jumlah
+                    </label>
+                    <p className="text-sm">
+                      Rp{" "}
+                      {selectedPayment.jumlah_pembayaran.toLocaleString(
+                        "id-ID"
+                      )}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">
+                      Metode
+                    </label>
+                    <p className="text-sm capitalize">
+                      {selectedPayment.metode_pembayaran}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">
+                      Status
+                    </label>
+                    <Badge
+                      variant={
+                        selectedPayment.status_pembayaran
+                          ? "default"
+                          : "destructive"
+                      }
+                      className="ml-2"
+                    >
+                      {selectedPayment.status_pembayaran ? "Lunas" : "Pending"}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Payment Proof Image */}
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">
+                    Bukti Pembayaran
+                  </label>
+                  <div className="mt-2">
+                    {selectedPayment.bukti_pembayaran ? (
+                      <img
+                        src={selectedPayment.bukti_pembayaran}
+                        alt="Bukti pembayaran"
+                        className="max-w-full h-auto rounded-lg border"
+                        style={{ maxHeight: "300px" }}
+                      />
+                    ) : (
+                      <div className="p-4 border-2 border-dashed border-muted-foreground/25 rounded-lg text-center">
+                        <p className="text-muted-foreground text-sm">
+                          Belum ada bukti pembayaran yang diunggah
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <DialogFooter className="flex gap-2 w-full justify-end">
+              {selectedPayment && !selectedPayment.status_pembayaran && (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsModalOpen(false)}
+                  >
+                    Batal
+                  </Button>
+                  <Button
+                    onClick={handleUpdatePaymentStatus}
+                    disabled={updatePaymentMutation.isPending}
+                    className="bg-green-600
+                    hover:scale-100
+                    hover:bg-green-700"
+                  >
+                    {updatePaymentMutation.isPending ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                        Menyetujui...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="w-4 h-4 mr-2" />
+                        Setujui Pembayaran
+                      </>
+                    )}
+                  </Button>
+                </>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );

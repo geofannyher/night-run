@@ -1,0 +1,26 @@
+{
+  "name": "Night Run Kejaksaan Negeri Jember 2025",
+  "short_name": "Night Run 2025",
+  "description": "Event lari malam terbesar di Jember dengan kategori 5K dan 10K",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#84cc16",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64 32x32 24x24 16x16",
+      "type": "image/x-icon"
+    }
+  ],
+  "lang": "id",
+  "categories": ["sports", "events", "lifestyle"],
+  "screenshots": [
+    {
+      "src": "/banner.jpg",
+      "type": "image/jpeg",
+      "sizes": "1200x630"
+    }
+  ]
+}
