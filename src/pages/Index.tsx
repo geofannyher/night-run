@@ -97,8 +97,8 @@ const Index = () => {
                 loading="lazy"
               />
               <img
-                src="/kejaksaanLogo.png"
-                alt="Kejaksaan Negeri Jember"
+                src="/satpolLogo.png"
+                alt="Satpol Logo"
                 className="h-16 sm:h-20 w-auto object-contain"
                 loading="lazy"
               />
