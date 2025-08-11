@@ -25,6 +25,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   LogOut,
   Users,
   Trophy,
@@ -104,6 +114,7 @@ const AdminDashboard = () => {
   const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [showRejectConfirm, setShowRejectConfirm] = useState(false);
 
   // Fetch payment data from API - moved before early returns
   const {
@@ -183,6 +194,37 @@ const AdminDashboard = () => {
     },
     onError: (error: any) => {
       toast.error(error.message || "Gagal memperbarui status pembayaran");
+    },
+  });
+
+  // Reject payment status mutation
+  const rejectPaymentMutation = useMutation({
+    mutationFn: async (id_pembayaran: number) => {
+      try {
+        const response = await axios.put(
+          "https://event-be-one.vercel.app/pembayaran/tolak",
+          {
+            id: id_pembayaran,
+          }
+        );
+        return response.data;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          throw new Error(
+            error.response?.data?.message || "Failed to reject payment"
+          );
+        }
+        throw new Error("Failed to reject payment");
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["payments"] });
+      toast.success("Pembayaran berhasil ditolak");
+      setIsModalOpen(false);
+      setSelectedPayment(null);
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Gagal menolak pembayaran");
     },
   });
 
@@ -327,6 +369,17 @@ const AdminDashboard = () => {
   const handleUpdatePaymentStatus = () => {
     if (selectedPayment) {
       updatePaymentMutation.mutate(selectedPayment.id);
+    }
+  };
+
+  const handleRejectPayment = () => {
+    setShowRejectConfirm(true);
+  };
+
+  const handleConfirmReject = () => {
+    if (selectedPayment) {
+      rejectPaymentMutation.mutate(selectedPayment.id);
+      setShowRejectConfirm(false);
     }
   };
 
@@ -1035,23 +1088,43 @@ Terima kasih! 🙏`
                   {selectedUserData &&
                     !selectedUserData.pembayaran.status_pembayaran &&
                     selectedUserData.pembayaran.bukti_pembayaran && (
-                      <Button
-                        onClick={handleUpdatePaymentStatus}
-                        disabled={updatePaymentMutation.isPending}
-                        className="bg-vibrant-lime h-10 hover:scale-100 hover:bg-vibrant-lime/80"
-                      >
-                        {updatePaymentMutation.isPending ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                            Menyetujui...
-                          </>
-                        ) : (
-                          <>
-                            <Check className="w-4 h-4 mr-2" />
-                            Setujui Pembayaran
-                          </>
-                        )}
-                      </Button>
+                      <>
+                        <Button
+                          onClick={handleRejectPayment}
+                          disabled={rejectPaymentMutation.isPending}
+                          variant="destructive"
+                          className="h-10"
+                        >
+                          {rejectPaymentMutation.isPending ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                              Menolak...
+                            </>
+                          ) : (
+                            <>
+                              <X className="w-4 h-4 mr-2" />
+                              Tolak Pembayaran
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          onClick={handleUpdatePaymentStatus}
+                          disabled={updatePaymentMutation.isPending}
+                          className="bg-vibrant-lime h-10 hover:scale-100 hover:bg-vibrant-lime/80"
+                        >
+                          {updatePaymentMutation.isPending ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                              Menyetujui...
+                            </>
+                          ) : (
+                            <>
+                              <Check className="w-4 h-4 mr-2" />
+                              Setujui Pembayaran
+                            </>
+                          )}
+                        </Button>
+                      </>
                     )}
                   <Button
                     variant="outline"
@@ -1161,6 +1234,32 @@ Terima kasih! 🙏`
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Reject Confirmation Dialog */}
+        <AlertDialog
+          open={showRejectConfirm}
+          onOpenChange={setShowRejectConfirm}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Konfirmasi Penolakan</AlertDialogTitle>
+              <AlertDialogDescription>
+                Apakah Anda yakin ingin menolak pembayaran ini? Tindakan ini
+                tidak dapat dibatalkan dan peserta akan menerima notifikasi
+                bahwa pembayaran mereka ditolak.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Batal</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleConfirmReject}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Ya, Tolak Pembayaran
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );
