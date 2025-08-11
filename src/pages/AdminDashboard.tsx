@@ -401,7 +401,7 @@ const AdminDashboard = () => {
 
     const message = `Halo ${
       userData.nama_lengkap
-    }! Saya dari Tim Admin TE Flash Run.
+    }! Saya dari Tim Admin Night Run Kejaksaan Negeri Jember.
 
 Mengenai pembayaran pendaftaran Anda:
 • ID Peserta: #${userData.id}

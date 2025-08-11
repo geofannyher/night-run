@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import axios from "axios";
+import { Upload, X, Eye } from "lucide-react";
 
 const PaymentRegistration = () => {
   const navigate = useNavigate();
@@ -28,6 +29,7 @@ const PaymentRegistration = () => {
   const categoryFromParams = searchParams.get("category") || "";
 
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [user, setUser] = useState("");
   const [paymentId, setPaymentId] = useState("");
   const [category, setCategory] = useState("");
@@ -45,6 +47,28 @@ const PaymentRegistration = () => {
     id_pembayaran,
     categoryFromParams,
   ]);
+
+  // Cleanup function for URL objects
+  useEffect(() => {
+    return () => {
+      if (imagePreview) {
+        URL.revokeObjectURL(imagePreview);
+      }
+    };
+  }, [imagePreview]);
+
+  const handleRemoveImage = () => {
+    if (imagePreview) {
+      URL.revokeObjectURL(imagePreview);
+    }
+    setImageFile(null);
+    setImagePreview(null);
+    // Reset the file input
+    const fileInput = document.getElementById("image") as HTMLInputElement;
+    if (fileInput) {
+      fileInput.value = "";
+    }
+  };
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -159,31 +183,93 @@ const PaymentRegistration = () => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="image">Upload Bukti Transfer (Max 5MB)</Label>
-                <Input
-                  id="image"
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0] || null;
-                    if (file) {
-                      const maxSize = 5 * 1024 * 1024; // 5MB
-                      if (file.size > maxSize) {
-                        toast.error("Ukuran file maksimal 5MB");
-                        e.target.value = ""; // Clear the input
-                        return;
+                <div className="relative">
+                  <Input
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    className="cursor-pointer file:cursor-pointer"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] || null;
+                      if (file) {
+                        const maxSize = 5 * 1024 * 1024; // 5MB
+                        if (file.size > maxSize) {
+                          toast.error("Ukuran file maksimal 5MB");
+                          e.target.value = ""; // Clear the input
+                          return;
+                        }
+
+                        // Create preview URL
+                        const previewUrl = URL.createObjectURL(file);
+                        setImagePreview(previewUrl);
+                      } else {
+                        setImagePreview(null);
                       }
-                    }
-                    setImageFile(file);
-                  }}
-                  required
-                />
+                      setImageFile(file);
+                    }}
+                    required
+                  />
+                </div>
               </div>
+
+              {/* Image Preview */}
+              {imagePreview && (
+                <div className="space-y-2">
+                  <Label>Preview Bukti Transfer</Label>
+                  <div className="relative border-2 border-dashed border-muted-foreground/25 rounded-lg p-4">
+                    <div className="flex items-start gap-4">
+                      <div className="relative flex-shrink-0">
+                        <img
+                          src={imagePreview}
+                          alt="Preview bukti transfer"
+                          className="w-32 h-32 object-cover rounded-lg border"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full"
+                          onClick={handleRemoveImage}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                      <div className="flex-1 space-y-1">
+                        <p className="text-sm font-medium">{imageFile?.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {imageFile && (
+                            <>
+                              Ukuran:{" "}
+                              {(imageFile.size / 1024 / 1024).toFixed(2)} MB
+                            </>
+                          )}
+                        </p>
+                        <p className="text-xs text-green-600">
+                          ✓ File siap untuk diunggah
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <Button
                 type="submit"
                 className="w-full hover:scale-100"
                 disabled={mutation.isPending}
+                size="lg"
               >
-                {mutation.isPending ? "Uploading..." : "Submit Payment"}
+                {mutation.isPending ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                    Mengunggah Bukti Transfer...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Submit Payment
+                  </>
+                )}
               </Button>
             </form>
           </CardContent>
