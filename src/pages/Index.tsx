@@ -2,7 +2,6 @@ import Header from "@/components/Header";
 import NightRunDetailSection from "@/components/NightRunDetailSection";
 import PricingSection from "@/components/PricingSection";
 import TimelineSection from "@/components/TimelineSection";
-import GatesPreviewSection from "@/components/GatesPreviewSection";
 import FAQSection from "@/components/FAQSection";
 import Footer from "@/components/Footer";
 import ActivitiesSection from "@/components/ActivitiesSection";
@@ -115,7 +114,7 @@ const Index = () => {
       <EntertainmentSection />
       <PricingSection />
       <TimelineSection />
-      <GatesPreviewSection />
+      {/* <GatesPreviewSection /> */}
       <FAQSection />
       <Footer />
     </div>
