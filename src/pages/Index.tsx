@@ -87,31 +87,31 @@ const Index = () => {
               <img
                 src="/beaLogo.png"
                 alt="BEA"
-                className="h-10 sm:h-12 w-auto object-contain"
+                className="h-16 sm:h-20 w-auto object-contain"
                 loading="lazy"
               />
               <img
                 src="/jemberkabLogo.png"
                 alt="Jember Kabupaten"
-                className="h-10 sm:h-12 w-auto object-contain"
+                className="h-16 sm:h-20 w-auto object-contain"
                 loading="lazy"
               />
               <img
                 src="/kejaksaanLogo.png"
                 alt="Kejaksaan Negeri Jember"
-                className="h-10 sm:h-12 w-auto object-contain"
+                className="h-16 sm:h-20 w-auto object-contain"
                 loading="lazy"
               />
               <img
                 src="/kejaksaanLogo.png"
                 alt="Kejaksaan Negeri Jember"
-                className="h-10 sm:h-12 w-auto object-contain"
+                className="h-16 sm:h-20 w-auto object-contain"
                 loading="lazy"
               />
               <img
                 src="/rokokLogo.png"
                 alt="Rokok Ilegal"
-                className="h-10 sm:h-12 w-auto object-contain"
+                className="h-16 sm:h-20 w-auto object-contain"
                 loading="lazy"
               />
             </div>
