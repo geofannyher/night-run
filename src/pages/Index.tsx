@@ -63,13 +63,17 @@ const Index = () => {
             </div>
           </div>
           <div className="relative">
-            <img
-              src="/banner.jpg"
-              alt="Night Run Kejaksaan Negeri Jember 2025 - Event lari malam di Alun-alun Jember"
-              className="w-full h-full object-cover rounded-3xl shadow-2xl"
-              itemProp="image"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-3xl" />
+            <div className="relative overflow-hidden">
+              <img
+                src="/banner.jpg"
+                alt="Night Run Kejaksaan Negeri Jember 2025 - Event lari malam di Alun-alun Jember"
+                className="w-full h-full object-cover rounded-sm"
+                itemProp="image"
+              />
+
+              {/* Frame highlight effect */}
+              <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-white/10 to-transparent pointer-events-none rounded-sm" />
+            </div>
           </div>
         </div>
 
@@ -81,20 +85,32 @@ const Index = () => {
             </span>
             <div className="flex flex-wrap items-center justify-center gap-6 sm:gap-10">
               <img
-                src="/sponsors/img1.png"
-                alt="Sayap Jatim"
+                src="/beaLogo.png"
+                alt="BEA"
                 className="h-10 sm:h-12 w-auto object-contain"
                 loading="lazy"
               />
               <img
-                src="/sponsors/img2.png"
-                alt="Pandalungan Festival"
+                src="/jemberkabLogo.png"
+                alt="Jember Kabupaten"
                 className="h-10 sm:h-12 w-auto object-contain"
                 loading="lazy"
               />
               <img
-                src="/sponsors/img3.png"
-                alt="Bank Jatim"
+                src="/kejaksaanLogo.png"
+                alt="Kejaksaan Negeri Jember"
+                className="h-10 sm:h-12 w-auto object-contain"
+                loading="lazy"
+              />
+              <img
+                src="/kejaksaanLogo.png"
+                alt="Kejaksaan Negeri Jember"
+                className="h-10 sm:h-12 w-auto object-contain"
+                loading="lazy"
+              />
+              <img
+                src="/rokokLogo.png"
+                alt="Rokok Ilegal"
                 className="h-10 sm:h-12 w-auto object-contain"
                 loading="lazy"
               />

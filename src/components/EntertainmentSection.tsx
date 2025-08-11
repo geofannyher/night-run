@@ -38,14 +38,19 @@ const EntertainmentSection = () => {
 
           {/* Right: single collage container */}
           <div>
-            <div className="bg-background rounded-3xl overflow-hidden shadow-sm">
+            <div className="bg-background rounded-3xl overflow-hidden">
               <div className="grid grid-cols-2 gap-2 p-2 sm:p-3">
                 <img
+                  src="/artistLogo.png"
+                  alt="Artist 3"
+                  className="h-auto w-full object-cover rounded-xl"
+                />
+                {/* <img
                   src="/placeholder.svg"
                   alt="Artist 1"
                   className="h-40 w-full object-cover rounded-xl"
-                />
-                <img
+                /> */}
+                {/* <img
                   src="/placeholder.svg"
                   alt="Artist 2"
                   className="h-40 w-full object-cover rounded-xl"
@@ -59,7 +64,7 @@ const EntertainmentSection = () => {
                   src="/placeholder.svg"
                   alt="Artist 4"
                   className="h-40 w-full object-cover rounded-xl"
-                />
+                /> */}
               </div>
             </div>
           </div>
