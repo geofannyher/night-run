@@ -28,8 +28,7 @@ const NightRunDetailSection = () => {
               <p className="text-base leading-relaxed">
                 Dalam rangka ikut menyambut Hari Kejaksaan Nasional tahun 2025
                 yang ke-79 tahun, Kejaksaan Negeri Jember ikut menyemarakkan
-                dengan diadakannya event Night Run. Salah satu bentuk olahraga
-                ringan namun memiliki manfaat besar.
+                dengan diadakannya event Night Run.
               </p>
 
               <p className="text-base leading-relaxed">
@@ -37,14 +36,6 @@ const NightRunDetailSection = () => {
                 dan mempererat rasa kebersamaan. Night Run Kejaksaan Negeri
                 Jember akan diselenggarakan pada hari Sabtu, tanggal 6 September
                 2025 bertempat di Jl. Sudarman, Alun-alun Kabupaten Jember.
-              </p>
-
-              <p className="text-base leading-relaxed">
-                Event Night Run Kejaksaan Negeri Jember ini menggunakan anggaran
-                DBHCHT tahun anggaran 2025. Kegiatan ini adalah program kerja
-                sama antara Kejaksaan Kabupaten Jember, Bea dan Cukai dan Satpol
-                PP sebagai bentuk acara untuk menyambut hari Kemerdekaan
-                Republik Indonesia.
               </p>
             </div>
           </div>

@@ -8,26 +8,25 @@ const EntertainmentSection = () => {
           FESTIVAL <span className="text-vibrant-lime">ENTERTAINMENT</span>
         </h2>
 
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left: bullet points */}
-          <div>
-            <div className="p-6 bg-background rounded-2xl">
-              <h3 className="text-4xl font-bold mb-4">What’s on Stage</h3>
+        <div className="flex justify-center">
+          <div className="max-w-2xl">
+            <div className="p-6 bg-background rounded-2xl text-center">
+              <h3 className="text-4xl font-bold mb-6">What's on Stage</h3>
               <ul className="space-y-4 text-muted-foreground">
-                <li className="flex items-start gap-3">
-                  <Mic className="w-5 h-5 mt-1 text-vibrant-lime" />
+                <li className="flex items-center justify-center gap-3">
+                  <Mic className="w-5 h-5 text-vibrant-lime" />
                   <span className="text-foreground text-lg font-semibold">
                     Master of Ceremony
                   </span>
                 </li>
-                <li className="flex items-start gap-3">
-                  <Music2 className="w-5 h-5 mt-1 text-vibrant-lime" />
+                <li className="flex items-center justify-center gap-3">
+                  <Music2 className="w-5 h-5 text-vibrant-lime" />
                   <span className="text-foreground text-lg font-semibold">
                     Local Artist
                   </span>
                 </li>
-                <li className="flex items-start gap-3">
-                  <Award className="w-5 h-5 mt-1 text-vibrant-lime" />
+                <li className="flex items-center justify-center gap-3">
+                  <Award className="w-5 h-5 text-vibrant-lime" />
                   <span className="text-foreground text-lg font-semibold">
                     Awarding Moment
                   </span>
@@ -35,22 +34,23 @@ const EntertainmentSection = () => {
               </ul>
             </div>
           </div>
+        </div>
 
-          {/* Right: single collage container */}
-          <div>
-            <div className="bg-background rounded-3xl overflow-hidden">
-              <div className="grid grid-cols-2 gap-2 p-2 sm:p-3">
-                <img
+        {/* Right: single collage container */}
+        <div>
+          <div className="bg-background rounded-3xl overflow-hidden">
+            <div className="grid grid-cols-2 gap-2 p-2 sm:p-3">
+              {/* <img
                   src="/artistLogo.png"
                   alt="Artist 3"
                   className="h-auto w-full object-cover rounded-xl"
-                />
-                {/* <img
+                /> */}
+              {/* <img
                   src="/placeholder.svg"
                   alt="Artist 1"
                   className="h-40 w-full object-cover rounded-xl"
                 /> */}
-                {/* <img
+              {/* <img
                   src="/placeholder.svg"
                   alt="Artist 2"
                   className="h-40 w-full object-cover rounded-xl"
@@ -65,7 +65,6 @@ const EntertainmentSection = () => {
                   alt="Artist 4"
                   className="h-40 w-full object-cover rounded-xl"
                 /> */}
-              </div>
             </div>
           </div>
         </div>

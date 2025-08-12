@@ -17,7 +17,7 @@ const RegistrationDetailsSection = () => {
                   Daftar melalui landing page resmi yang telah disediakan.
                 </li>
                 <li>
-                  Pendaftaran dibuka 1 Agustus 2025, ditutup 31 Agustus 2025.
+                  Pendaftaran dibuka 1 Agustus 2025, ditutup 5 September 2025.
                 </li>
               </ul>
             </div>
@@ -86,6 +86,9 @@ const RegistrationDetailsSection = () => {
                 <li>Jersey diberikan ukuran All Size.</li>
                 <li>Cek nama dan nomor BIB.</li>
                 <li>Cek kelengkapan Race Pack.</li>
+                <li>
+                  Biaya pemulihan kesehatan runner ditanggung masing-masing.
+                </li>
               </ul>
             </div>
 

@@ -5,7 +5,7 @@ const TimelineSection = () => {
     {
       icon: Calendar,
       title: "Pendaftaran",
-      date: "1 Agustus - 31 Agustus 2025",
+      date: "1 Agustus - 5 September 2025",
       description: "Periode pendaftaran awal",
     },
     {

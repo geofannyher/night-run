@@ -15,7 +15,7 @@ const FAQSection = () => {
     {
       question: "Kapan periode pendaftaran Night Run 2025?",
       answer:
-        "Pendaftaran dibuka mulai 1 Agustus 2025 dan ditutup pada 31 Agustus 2025, atau lebih cepat jika kuota terpenuhi.",
+        "Pendaftaran dibuka mulai 1 Agustus 2025 dan ditutup pada 5 September 2025, atau lebih cepat jika kuota terpenuhi.",
     },
     {
       question: "Bagaimana cara mendaftar?",
