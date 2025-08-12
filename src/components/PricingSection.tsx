@@ -155,7 +155,7 @@ const PricingSection = () => {
         </div>
 
         {/* Target Audience - centered pills */}
-        <div className="mt-8 max-w-3xl mx-auto">
+        {/* <div className="mt-8 max-w-3xl mx-auto">
           <div className="p-6 bg-muted/30 rounded-2xl text-center">
             <h3 className="text-xl font-bold mb-3">Sasaran Peserta</h3>
             <div className="flex flex-wrap justify-center gap-2">
@@ -169,7 +169,7 @@ const PricingSection = () => {
               ))}
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
     </section>
   );
