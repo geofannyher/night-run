@@ -73,9 +73,6 @@ const RegistrationDetailsSection = () => {
                   Wajib menyertakan surat kuasa (jika pengambilan RPC
                   diwakilkan).
                 </li>
-                <li>
-                  Wajib menyertakan surat pernyataan sehat jasmani dan rohani.
-                </li>
               </ul>
             </div>
 
