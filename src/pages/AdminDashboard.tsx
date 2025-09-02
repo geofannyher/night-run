@@ -403,14 +403,14 @@ const AdminDashboard = () => {
     const message =
       userData?.pembayaran?.status_pembayaran &&
       userData.pembayaran.bukti_pembayaran
-        ? `Halo, rajih kharissuha!
+        ? `Halo, ${userData.nama_lengkap}!
 Saya dari Tim Admin Night Run Kejaksaan Negeri Jember.
 
 Detail Pendaftaran Anda: 
-ID Peserta: #2
-Nama: rajih kharissuha 
-Kategori: 10K
-Jumlah: Rp 180.000 
+ID Peserta: #${userData.id}
+Nama: ${userData.nama_lengkap}
+Kategori: ${userData.tipe}K
+Jumlah: Rp ${userData.pembayaran.jumlah_pembayaran.toLocaleString("id-ID")}
 Status: Lunas
 
 Terima kasih! Pembayaran Anda sudah kami konfirmasi.         
