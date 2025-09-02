@@ -10,7 +10,7 @@ const NightRunDetailSection = () => {
     {
       icon: Calendar,
       title: "Jam & Tanggal Acara",
-      description: "Sabtu, 6 September 2025 - 19:00 WIB",
+      description: "Menunggu Pengumuman Lebih Lanjut",
     },
   ];
 
@@ -34,8 +34,8 @@ const NightRunDetailSection = () => {
               <p className="text-base leading-relaxed">
                 Kegiatan ini diharapkan dapat menumbuhkan semangat hidup sehat
                 dan mempererat rasa kebersamaan. Night Run Kejaksaan Negeri
-                Jember akan diselenggarakan pada hari Sabtu, tanggal 6 September
-                2025 bertempat di Jl. Sudarman, Alun-alun Kabupaten Jember.
+                Jember akan diselenggarakan di Jl. Sudarman, Alun-alun Kabupaten
+                Jember.
               </p>
             </div>
           </div>

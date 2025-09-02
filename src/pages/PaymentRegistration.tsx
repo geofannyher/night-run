@@ -106,7 +106,8 @@ const PaymentRegistration = () => {
     },
     onSuccess: () => {
       toast.success("Bukti pembayaran berhasil diunggah");
-      navigate("/", { replace: true });
+      // Navigate to success page with user parameters
+      navigate(`/register-success?id=${encodeURIComponent(paymentId)}&username=${encodeURIComponent(user)}`, { replace: true });
     },
     onError: (err: any) => toast.error(err?.message || "Gagal mengunggah"),
   });
@@ -119,6 +120,10 @@ const PaymentRegistration = () => {
             <CardTitle className="text-3xl font-black italic">
               PENDAFTARAN <span className="text-vibrant-lime">BERHASIL</span>
             </CardTitle>
+            <CardDescription className="font-semibold text-2xl">
+              Tinggal{" "}
+              <span className="text-vibrant-lime">1 Langkah lagi !</span>
+            </CardDescription>
             <CardDescription>
               Silakan melakukan pembayaran dengan informasi berikut:
             </CardDescription>

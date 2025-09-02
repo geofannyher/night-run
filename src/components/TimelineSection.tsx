@@ -5,19 +5,19 @@ const TimelineSection = () => {
     {
       icon: Calendar,
       title: "Pendaftaran",
-      date: "1 Agustus - 5 September 2025",
+      date: "Dimulai 1 Agustus",
       description: "Periode pendaftaran awal",
     },
     {
       icon: Package,
-      title: "Pengumpulan Paket Lari",
-      date: "4-5 September 2025",
-      description: "Kumpulkan kit lari dan jersey Anda",
+      title: "Pengambilan Race Pack",
+      date: "Dimulai 4 September 2025",
+      description: "Race pack dapat diambil di tempat yang dipilih",
     },
     {
       icon: Play,
       title: "Hari Acara",
-      date: "6 September 2025",
+      date: "Menunggu Pengumuman lebih lanjut",
       description: "Acara lari utama dimulai pukul 7:00 PM WIB",
     },
   ];

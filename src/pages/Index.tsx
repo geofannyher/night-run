@@ -7,6 +7,14 @@ import Footer from "@/components/Footer";
 import ActivitiesSection from "@/components/ActivitiesSection";
 import EntertainmentSection from "@/components/EntertainmentSection";
 import RegistrationDetailsSection from "@/components/RegistrationDetailsSection";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 
 const Index = () => {
   return (
@@ -63,17 +71,42 @@ const Index = () => {
             </div>
           </div>
           <div className="relative">
-            <div className="relative overflow-hidden">
-              <img
-                src="/banner.jpg"
-                alt="Night Run Kejaksaan Negeri Jember 2025 - Event lari malam di Alun-alun Jember"
-                className="w-full h-full object-cover rounded-sm"
-                itemProp="image"
-              />
-
-              {/* Frame highlight effect */}
-              <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-white/10 to-transparent pointer-events-none rounded-sm" />
-            </div>
+            <Carousel 
+              className="w-full"
+              plugins={[
+                Autoplay({
+                  delay: 2000,
+                }),
+              ]}
+            >
+              <CarouselContent>
+                <CarouselItem>
+                  <div className="relative overflow-hidden">
+                    <img
+                      src="/banner.jpg"
+                      alt="Night Run Kejaksaan Negeri Jember 2025 - Event lari malam di Alun-alun Jember"
+                      className="w-full h-full object-cover rounded-sm"
+                      itemProp="image"
+                    />
+                    {/* Frame highlight effect */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-white/10 to-transparent pointer-events-none rounded-sm" />
+                  </div>
+                </CarouselItem>
+                <CarouselItem>
+                  <div className="relative overflow-hidden">
+                    <img
+                      src="/anoucment.jpg"
+                      alt="Pengumuman Night Run Kejaksaan Negeri Jember 2025"
+                      className="w-full h-full object-cover rounded-sm"
+                    />
+                    {/* Frame highlight effect */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-white/10 to-transparent pointer-events-none rounded-sm" />
+                  </div>
+                </CarouselItem>
+              </CarouselContent>
+              <CarouselPrevious className="left-2" />
+              <CarouselNext className="right-2" />
+            </Carousel>
           </div>
         </div>
 
