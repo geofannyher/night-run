@@ -57,6 +57,7 @@ import { toast } from "sonner";
 
 import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 interface Pembayaran {
   id: number;
@@ -399,9 +400,30 @@ const AdminDashboard = () => {
       whatsappNumber = "6289123456789";
     }
 
-    const message = `Halo ${
-      userData.nama_lengkap
-    }! Saya dari Tim Admin Night Run Kejaksaan Negeri Jember.
+    const message =
+      userData?.pembayaran?.status_pembayaran &&
+      userData.pembayaran.bukti_pembayaran
+        ? `Halo, rajih kharissuha!
+Saya dari Tim Admin Night Run Kejaksaan Negeri Jember.
+
+Detail Pendaftaran Anda: 
+ID Peserta: #2
+Nama: rajih kharissuha 
+Kategori: 10K
+Jumlah: Rp 180.000 
+Status: Lunas
+
+Terima kasih! Pembayaran Anda sudah kami konfirmasi.         
+
+PENGUMUMAN PENTING
+Dengan penuh rasa hormat, kami informasikan bahwa pelaksanaan acara Adhyaksa Night Run DITUNDA hingga waktu yang akan diberitahukan kembali.
+
+Keputusan ini diambil demi menjaga kenyamanan bersama, mengingat situasi saat ini yang belum sepenuhnya kondusif. Kesehatan, keamanan, dan kenyamanan seluruh peserta adalah prioritas utama.
+
+Mari kita nantikan waktu terbaik untuk berlari dan merayakan kebersamaan dengan semangat yang sama.`
+        : `Halo ${
+            userData.nama_lengkap
+          }! Saya dari Tim Admin Night Run Kejaksaan Negeri Jember.
 
 Mengenai pembayaran pendaftaran Anda:
 • ID Peserta: #${userData.id}
@@ -409,12 +431,12 @@ Mengenai pembayaran pendaftaran Anda:
 • Kategori: ${userData.tipe}K
 • Jumlah: Rp ${userData.pembayaran.jumlah_pembayaran.toLocaleString("id-ID")}
 • Status: ${
-      userData.pembayaran.status_pembayaran
-        ? "Lunas"
-        : userData.pembayaran.bukti_pembayaran
-        ? "Menunggu Verifikasi"
-        : "Belum Bayar"
-    }
+            userData.pembayaran.status_pembayaran
+              ? "Lunas"
+              : userData.pembayaran.bukti_pembayaran
+              ? "Menunggu Verifikasi"
+              : "Belum Bayar"
+          }
 
 ${
   userData.pembayaran.status_pembayaran
@@ -801,10 +823,15 @@ Terima kasih! 🙏`
                       <TableCell>
                         <div className="flex gap-2">
                           <Button
+                            disabled={Number(item.no_wa) == 0}
                             variant="outline"
                             size="sm"
                             onClick={() => handleWhatsAppContact(item)}
-                            className="text-green-600 border-green-600 hover:bg-green-50"
+                            className={cn(
+                              Number(item.no_wa) === 0
+                                ? "text-gray-600"
+                                : "text-green-600 border-green-600 hover:bg-green-50"
+                            )}
                           >
                             <MessageCircle className="w-4 h-4 mr-1" />
                             WA
