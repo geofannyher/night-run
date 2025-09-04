@@ -49,14 +49,17 @@ import {
   RotateCcw,
   Move,
   MessageCircle,
+  CheckCheck,
+  CircleAlert,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner";
 
-import { Label } from "@radix-ui/react-label";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 interface Pembayaran {
@@ -69,6 +72,27 @@ interface Pembayaran {
   createdAt: string;
   updatedAt: string;
   deletedAt: string;
+}
+
+interface RefundData {
+  id: number;
+  nik: string;
+  email: string;
+  no_wa: string;
+  pesertaId: number;
+  pembayaranId: number;
+  jumlah_refund: number;
+  alasan: string;
+  metode_refund: string;
+  nama_bank: string;
+  no_rekening: string;
+  nama_rekening: string;
+  status: string;
+  catatan_admin: string | null;
+  bukti_refund: string | null;
+  createdAt: string;
+  updatedAt: string;
+  isDeleted: boolean;
 }
 
 interface UserData {
@@ -90,6 +114,7 @@ interface UserData {
   updatedAt: string;
   deletedAt: string;
   pembayaran: Pembayaran;
+  refunds: RefundData[];
 }
 
 interface PaymentData {
@@ -106,6 +131,11 @@ const AdminDashboard = () => {
     null
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRefundModalOpen, setIsRefundModalOpen] = useState(false);
+  const [selectedRefundData, setSelectedRefundData] =
+    useState<RefundData | null>(null);
+  const [refundCatatanAdmin, setRefundCatatanAdmin] = useState("");
+  const [refundBuktiFile, setRefundBuktiFile] = useState<File | null>(null);
   const [isExporting, setIsExporting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editFormData, setEditFormData] = useState<Partial<UserData>>({});
@@ -198,7 +228,7 @@ const AdminDashboard = () => {
     },
   });
 
-  // Reject payment status mutation
+  // Reject payment mutation
   const rejectPaymentMutation = useMutation({
     mutationFn: async (id_pembayaran: number) => {
       try {
@@ -211,21 +241,102 @@ const AdminDashboard = () => {
         return response.data;
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          throw new Error(
-            error.response?.data?.message || "Failed to reject payment"
-          );
+          const message = error.response?.data?.message || error.message;
+          throw new Error(message || "Gagal menolak pembayaran");
         }
-        throw new Error("Failed to reject payment");
+        throw new Error("Gagal menolak pembayaran");
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["payments"] });
       toast.success("Pembayaran berhasil ditolak");
+      queryClient.invalidateQueries({ queryKey: ["paymentData"] });
       setIsModalOpen(false);
-      setSelectedPayment(null);
+      setShowRejectConfirm(false);
     },
-    onError: (error: any) => {
-      toast.error(error.message || "Gagal menolak pembayaran");
+    onError: (err: any) => {
+      toast.error(err?.message || "Gagal menolak pembayaran");
+      setShowRejectConfirm(false);
+    },
+  });
+
+  // Approve refund mutation
+  const approveRefundMutation = useMutation({
+    mutationFn: async (refundId: number) => {
+      const formData = new FormData();
+      if (refundCatatanAdmin) {
+        formData.append("catatan_admin", refundCatatanAdmin);
+      }
+      if (refundBuktiFile) {
+        formData.append("bukti_refund", refundBuktiFile);
+      }
+
+      try {
+        const response = await axios.post(
+          `https://event-be-one.vercel.app/refund/update-status/${refundId}`,
+          formData,
+          {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          }
+        );
+        return response.data;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          const message = error.response?.data?.message || error.message;
+          throw new Error(message || "Gagal menyetujui refund");
+        }
+        throw new Error("Gagal menyetujui refund");
+      }
+    },
+    onSuccess: () => {
+      toast.success("Refund berhasil disetujui");
+      queryClient.invalidateQueries({ queryKey: ["paymentData"] });
+      setIsRefundModalOpen(false);
+      setRefundCatatanAdmin("");
+      setRefundBuktiFile(null);
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Gagal menyetujui refund");
+    },
+  });
+
+  // Reject refund mutation
+  const rejectRefundMutation = useMutation({
+    mutationFn: async (refundId: number) => {
+      const payload: { catatan_admin?: string } = {};
+      if (refundCatatanAdmin) {
+        payload.catatan_admin = refundCatatanAdmin;
+      }
+
+      try {
+        const response = await axios.put(
+          `https://event-be-one.vercel.app/refund/update-status-reject/${refundId}`,
+          payload,
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        return response.data;
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          const message = error.response?.data?.message || error.message;
+          throw new Error(message || "Gagal menolak refund");
+        }
+        throw new Error("Gagal menolak refund");
+      }
+    },
+    onSuccess: () => {
+      toast.success("Refund berhasil ditolak");
+      queryClient.invalidateQueries({ queryKey: ["paymentData"] });
+      setIsRefundModalOpen(false);
+      setRefundCatatanAdmin("");
+      setRefundBuktiFile(null);
+    },
+    onError: (err: any) => {
+      toast.error(err?.message || "Gagal menolak refund");
     },
   });
 
@@ -252,6 +363,14 @@ const AdminDashboard = () => {
     setEditFormData(userData);
     setIsModalOpen(true);
     setIsEditing(false);
+  };
+
+  const handleViewRefund = (userData: UserData) => {
+    setSelectedRefundData(userData.refunds[0]);
+    setSelectedUserData(userData);
+    setIsRefundModalOpen(true);
+    setRefundCatatanAdmin("");
+    setRefundBuktiFile(null);
   };
 
   const handleEditToggle = () => {
@@ -754,12 +873,12 @@ Terima kasih! 🙏`
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="min-w-[100px]">ID Pembayaran</TableHead>
-                  <TableHead className="min-w-[120px]">ID Peserta</TableHead>
+                  <TableHead className="min-w-[10px]">ID</TableHead>
+                  <TableHead className="min-w-[120px]">Nama Peserta</TableHead>
                   <TableHead className="min-w-[80px]">Kategori</TableHead>
                   <TableHead className="min-w-[120px]">Jumlah</TableHead>
                   <TableHead className="min-w-[100px]">Metode</TableHead>
-                  <TableHead className="min-w-[100px]">Status</TableHead>
+                  <TableHead className="min-w-[200px]">Status</TableHead>
                   <TableHead className="min-w-[140px]">
                     Tanggal Dibuat
                   </TableHead>
@@ -773,7 +892,7 @@ Terima kasih! 🙏`
                       <TableCell className="font-medium">
                         #{item.pembayaran.id}
                       </TableCell>
-                      <TableCell>#{item.id}</TableCell>
+                      <TableCell>{item.nama_lengkap}</TableCell>
                       <TableCell>
                         <Badge
                           variant={item.tipe === "5" ? "default" : "secondary"}
@@ -792,20 +911,39 @@ Terima kasih! 🙏`
                       </TableCell>
                       <TableCell>
                         <Badge
-                          className="flex items-center justify-center"
-                          variant={
-                            item.pembayaran.status_pembayaran
-                              ? "default"
-                              : item.pembayaran.bukti_pembayaran
-                              ? "secondary"
-                              : "destructive"
-                          }
+                          className={cn(
+                            item?.refunds.length > 0
+                              ? "bg-purple-500"
+                              : item.pembayaran.status_pembayaran
+                              ? "bg-green-500"
+                              : !item.pembayaran.status_pembayaran &&
+                                item.pembayaran.bukti_pembayaran
+                              ? "bg-gray-500"
+                              : !item?.pembayaran.bukti_pembayaran
+                              ? "bg-red-500"
+                              : "flex items-center justify-center"
+                          )}
                         >
-                          {item.pembayaran.status_pembayaran
+                          {item?.refunds.length > 0 &&
+                          item?.refunds[0]?.status == "PENDING"
+                            ? "Perlu Approval Refund"
+                            : item?.refunds.length > 0 &&
+                              item?.refunds[0]?.status == "APPROVED"
+                            ? "Sudah di Approve"
+                            : item.pembayaran.status_pembayaran
                             ? "Lunas"
                             : item.pembayaran.bukti_pembayaran
                             ? "Menunggu Verifikasi"
                             : "Belum Bayar"}
+                          {item?.refunds.length > 0 &&
+                          item?.refunds[0]?.status == "PENDING" ? (
+                            <CircleAlert className="ml-2" />
+                          ) : item?.refunds.length > 0 &&
+                            item?.refunds[0]?.status == "APPROVED" ? (
+                            <Check className="ml-2" />
+                          ) : (
+                            <></>
+                          )}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -844,6 +982,16 @@ Terima kasih! 🙏`
                             <Eye className="w-4 h-4 mr-1" />
                             Lihat
                           </Button>
+                          {item?.refunds.length > 0 && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleViewRefund(item)}
+                            >
+                              <Eye className="w-4 h-4 mr-1" />
+                              Refund
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -1259,6 +1407,276 @@ Terima kasih! 🙏`
                 </div>
               )}
             </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Refund Modal */}
+        <Dialog open={isRefundModalOpen} onOpenChange={setIsRefundModalOpen}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-bold">
+                Detail Pengajuan Refund
+              </DialogTitle>
+              <DialogDescription>
+                Informasi lengkap pengajuan refund dari peserta
+              </DialogDescription>
+            </DialogHeader>
+
+            {selectedRefundData && selectedUserData && (
+              <div className="space-y-6">
+                {/* Refund Information */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-lg text-purple-800">
+                      Informasi Refund
+                    </h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="font-medium">ID Refund:</span>
+                        <span className="font-mono">
+                          {selectedRefundData.id}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">Status:</span>
+                        <Badge
+                          variant={
+                            selectedRefundData.status === "APPROVED"
+                              ? "default"
+                              : selectedRefundData.status === "PENDING"
+                              ? "secondary"
+                              : "destructive"
+                          }
+                        >
+                          {selectedRefundData.status}
+                        </Badge>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">Jumlah Refund:</span>
+                        <span className="font-semibold text-purple-700">
+                          Rp{" "}
+                          {selectedRefundData.jumlah_refund.toLocaleString(
+                            "id-ID"
+                          )}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">Tanggal Pengajuan:</span>
+                        <span>
+                          {new Date(
+                            selectedRefundData.createdAt
+                          ).toLocaleDateString("id-ID")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-lg text-purple-800">
+                      Data Peserta
+                    </h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span className="font-medium">Nama:</span>
+                        <span>{selectedUserData.nama_lengkap}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">NIK:</span>
+                        <span className="font-mono">
+                          {selectedRefundData.nik}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">Email:</span>
+                        <span>{selectedRefundData.email}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="font-medium">No. WhatsApp:</span>
+                        <span>{selectedRefundData.no_wa}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Refund Details */}
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="font-semibold">Alasan Refund</Label>
+                      <div className="p-3 bg-gray-50 rounded-lg border">
+                        <p className="text-sm">{selectedRefundData.alasan}</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-semibold">Metode Refund</Label>
+                      <div className="p-3 bg-gray-50 rounded-lg border">
+                        <p className="text-sm capitalize">
+                          {selectedRefundData.metode_refund.replace("_", " ")}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Payment Method Details */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="font-semibold">
+                        {selectedRefundData.metode_refund === "transfer_bank"
+                          ? "Nama Bank"
+                          : "Provider E-Wallet"}
+                      </Label>
+                      <div className="p-3 bg-gray-50 rounded-lg border">
+                        <p className="text-sm">
+                          {selectedRefundData.nama_bank}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-semibold">
+                        {selectedRefundData.metode_refund === "transfer_bank"
+                          ? "No. Rekening"
+                          : "No. HP/E-Wallet"}
+                      </Label>
+                      <div className="p-3 bg-gray-50 rounded-lg border">
+                        <p className="text-sm font-mono">
+                          {selectedRefundData.no_rekening}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="font-semibold">
+                      {selectedRefundData.metode_refund === "transfer_bank"
+                        ? "Nama Pemilik Rekening"
+                        : "Nama Penerima"}
+                    </Label>
+                    <div className="p-3 bg-gray-50 rounded-lg border">
+                      <p className="text-sm">
+                        {selectedRefundData.nama_rekening}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Admin Actions */}
+                {selectedRefundData.status === "PENDING" && (
+                  <div className="space-y-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h3 className="font-semibold text-lg text-blue-800">
+                      Tindakan Admin
+                    </h3>
+
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="catatan_admin">
+                          Catatan Admin (Opsional)
+                        </Label>
+                        <Textarea
+                          id="catatan_admin"
+                          value={refundCatatanAdmin}
+                          onChange={(e) =>
+                            setRefundCatatanAdmin(e.target.value)
+                          }
+                          placeholder="Tambahkan catatan untuk peserta..."
+                          className="min-h-[80px]"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="bukti_refund">Bukti Refund *</Label>
+                        <Input
+                          id="bukti_refund"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0] || null;
+                            setRefundBuktiFile(file);
+                          }}
+                          className="cursor-pointer file:cursor-pointer"
+                        />
+                        {refundBuktiFile && (
+                          <p className="text-xs text-green-600">
+                            ✓ File terpilih: {refundBuktiFile.name}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Existing Admin Notes */}
+                {selectedRefundData.catatan_admin && (
+                  <div className="space-y-2">
+                    <Label className="font-semibold">Catatan Admin</Label>
+                    <div className="p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                      <p className="text-sm">
+                        {selectedRefundData.catatan_admin}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            <DialogFooter className="gap-2">
+              {selectedRefundData?.status === "PENDING" && (
+                <>
+                  <Button
+                    onClick={() =>
+                      selectedRefundData &&
+                      rejectRefundMutation.mutate(selectedRefundData.id)
+                    }
+                    disabled={
+                      rejectRefundMutation.isPending ||
+                      approveRefundMutation.isPending
+                    }
+                    variant="destructive"
+                    className="bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    {rejectRefundMutation.isPending ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                        Menolak...
+                      </>
+                    ) : (
+                      <>
+                        <X className="w-4 h-4 mr-2" />
+                        Tolak Refund
+                      </>
+                    )}
+                  </Button>
+                  <Button
+                    onClick={() =>
+                      selectedRefundData &&
+                      approveRefundMutation.mutate(selectedRefundData.id)
+                    }
+                    disabled={
+                      approveRefundMutation.isPending ||
+                      rejectRefundMutation.isPending
+                    }
+                    className="bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    {approveRefundMutation.isPending ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                        Menyetujui...
+                      </>
+                    ) : (
+                      <>
+                        <Check className="w-4 h-4 mr-2" />
+                        Setujui Refund
+                      </>
+                    )}
+                  </Button>
+                </>
+              )}
+              <Button
+                variant="outline"
+                onClick={() => setIsRefundModalOpen(false)}
+              >
+                Tutup
+              </Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 

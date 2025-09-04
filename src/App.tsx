@@ -10,6 +10,8 @@ import LoginAdmin from "./pages/LoginAdmin";
 import AdminDashboard from "./pages/AdminDashboard";
 import PaymentRegistration from "./pages/PaymentRegistration";
 import RegisterSuccess from "./pages/RegisterSuccess";
+import RefundPage from "./pages/refund";
+import RefundSuccess from "./pages/RefundSuccess";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +29,8 @@ const App = () => (
             element={<PaymentRegistration />}
           />
           <Route path="/pendaftaran-success" element={<RegisterSuccess />} />
+          <Route path="/refund" element={<RefundPage />} />
+          <Route path="/refund-success" element={<RefundSuccess />} />
           <Route path="/login-admin" element={<LoginAdmin />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

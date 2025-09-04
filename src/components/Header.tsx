@@ -27,6 +27,16 @@ const Header = () => {
           >
             LOGIN
           </Button>
+          <Button
+            variant="default"
+            className="italic font-bold"
+            onClick={() => {
+              navigate("/refund");
+            }}
+            aria-label="Login Admin"
+          >
+            Pengajuan Refund
+          </Button>
           {/* <Button
           variant="default"
           className="rounded-sm bg-vibrant-lime hover:bg-vibrant-lime"
