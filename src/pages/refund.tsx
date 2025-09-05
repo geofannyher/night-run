@@ -47,12 +47,11 @@ const RefundPage = () => {
 
       try {
         const response = await axios.post(
-          "https://c5662d946bf5.ngrok-free.app/refund/pengajuan",
+          "https://event-be-one.vercel.app/refund/pengajuan",
           payload,
           {
             headers: {
               "Content-Type": "application/json",
-              "ngrok-skip-browser-warning": "true",
             },
           }
         );
