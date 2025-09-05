@@ -166,12 +166,12 @@ const RefundPage = () => {
               {/* Peserta ID and WhatsApp */}
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <>
+                  <div className="space-y-1">
                     <Label htmlFor="pesertaId">ID Peserta *</Label>
                     <p className="text-xs text-red-500 italic">
                       ID Peserta dapat di cek di Email
                     </p>
-                  </>
+                  </div>
                   <Input
                     id="pesertaId"
                     type="number"
@@ -184,7 +184,10 @@ const RefundPage = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="nowa">No. WhatsApp</Label>
+                  <div className="space-y-1">
+                    <Label htmlFor="nowa">No. WhatsApp</Label>
+                    <div className="h-4"></div>
+                  </div>
                   <Input
                     id="nowa"
                     value={formData.nowa}
