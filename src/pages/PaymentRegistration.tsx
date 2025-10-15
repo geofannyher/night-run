@@ -107,7 +107,12 @@ const PaymentRegistration = () => {
     onSuccess: () => {
       toast.success("Bukti pembayaran berhasil diunggah");
       // Navigate to success page with user parameters
-      navigate(`/register-success?id=${encodeURIComponent(paymentId)}&username=${encodeURIComponent(user)}`, { replace: true });
+      navigate(
+        `/register-success?id=${encodeURIComponent(
+          paymentId
+        )}&username=${encodeURIComponent(user)}`,
+        { replace: true }
+      );
     },
     onError: (err: any) => toast.error(err?.message || "Gagal mengunggah"),
   });
@@ -155,7 +160,7 @@ const PaymentRegistration = () => {
                 <div className="flex justify-between">
                   <span className="font-medium">Jumlah Nominal:</span>
                   <span className="text-vibrant-lime font-semibold">
-                    {category === "10" ? "Rp 180.000" : "Rp 160.000"}
+                    {category === "10" ? "Rp 180.000" : "Rp 150.000"}
                   </span>
                 </div>
               </div>

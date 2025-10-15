@@ -10,7 +10,7 @@ const NightRunDetailSection = () => {
     {
       icon: Calendar,
       title: "Jam & Tanggal Acara",
-      description: "Menunggu Pengumuman Lebih Lanjut",
+      description: "Night run dilaksanakan pada tanggal 22 November",
     },
   ];
 

@@ -54,8 +54,8 @@ const RegistrationDetailsSection = () => {
             <div className="p-6 bg-muted/30 rounded-2xl">
               <h3 className="text-xl font-bold mb-3">Race Pack Collection</h3>
               <p className="text-muted-foreground">
-                Dimulai Tanggal 4 September 2025, bertempat di Kantor Kejaksaan
-                dan Cafe Kopi Naga 99, Jam 10.00 - 20.00 WIB
+                Dimulai Tanggal 20 - 21 November 2025, bertempat di Kantor
+                Kejaksaan dan Cafe Kopi Naga 99, Jam 10.00 - 20.00 WIB
               </p>
             </div>
 

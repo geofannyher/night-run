@@ -25,7 +25,7 @@ const FAQSection = () => {
     {
       question: "Kapan dan di mana pengambilan Race Pack?",
       answer:
-        "Race Pack dapat diambil pada 4-5 September 2025 pukul 10.00 - 20.00 WIB di Kantor Kejaksaan Negeri Jember atau Cafe Kopi Naga 99. Harap membawa fotokopi KTP/identitas, e-ticket, dan surat pernyataan sehat. Jika diwakilkan, sertakan surat kuasa.",
+        "Race Pack dapat diambil pada 20-21 November 2025 pukul 10.00 - 20.00 WIB di Kantor Kejaksaan Negeri Jember atau Cafe Kopi Naga 99. Harap membawa fotokopi KTP/identitas, e-ticket, dan surat pernyataan sehat. Jika diwakilkan, sertakan surat kuasa.",
     },
     {
       question: "Apakah jersey bisa ditukar jika ukurannya tidak pas?",

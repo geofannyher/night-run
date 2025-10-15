@@ -52,7 +52,7 @@ const RegisterRunning = () => {
   const [birthDay, setBirthDay] = useState<string>("");
 
   const price = useMemo(
-    () => (formData.tipe === 10 ? "180000" : "160000"),
+    () => (formData.tipe === 10 ? "180000" : "150000"),
     [formData.tipe]
   );
 
@@ -378,6 +378,7 @@ const RegisterRunning = () => {
               <div className="space-y-2">
                 <Label htmlFor="penyakit">Riwayat Penyakit (opsional)</Label>
                 <Input
+                  placeholder="Kosongkan jika tidak ada"
                   id="penyakit"
                   value={formData.riwayat_penyakit}
                   onChange={(e) =>
@@ -416,8 +417,8 @@ const RegisterRunning = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="5">5K (Rp 160.000)</SelectItem>
-                      <SelectItem value="10">10K (Rp 180.000)</SelectItem>
+                      <SelectItem value="5">5K (Rp 150.000)</SelectItem>
+                      {/* <SelectItem value="10">10K (Rp 180.000)</SelectItem> */}
                     </SelectContent>
                   </Select>
                 </div>

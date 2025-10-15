@@ -11,13 +11,13 @@ const TimelineSection = () => {
     {
       icon: Package,
       title: "Pengambilan Race Pack",
-      date: "Dimulai 4 September 2025",
+      date: "Dimulai 20 - 21 November 2025",
       description: "Race pack dapat diambil di tempat yang dipilih",
     },
     {
       icon: Play,
       title: "Hari Acara",
-      date: "Menunggu Pengumuman lebih lanjut",
+      date: "22 November 2025",
       description: "Acara lari utama dimulai pukul 7:00 PM WIB",
     },
   ];

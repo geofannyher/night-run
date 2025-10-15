@@ -34,7 +34,7 @@ const PricingSection = () => {
   const tiers = [
     {
       title: "5K",
-      price: "IDR 160,000",
+      price: "IDR 150,000",
       image: "/banner.jpg",
       inStock: stockData ? stockData.count5 < MAX_PARTICIPANTS : true,
       link: "/register-running?category=5k",
@@ -43,17 +43,17 @@ const PricingSection = () => {
         ? MAX_PARTICIPANTS - stockData.count5
         : MAX_PARTICIPANTS,
     },
-    {
-      title: "10K",
-      price: "IDR 180,000",
-      image: "/banner.jpg",
-      inStock: stockData ? stockData.count10 < MAX_PARTICIPANTS : true,
-      link: "/register-running?category=10k",
-      stockCount: stockData?.count10 || 0,
-      remaining: stockData
-        ? MAX_PARTICIPANTS - stockData.count10
-        : MAX_PARTICIPANTS,
-    },
+    // {
+    //   title: "10K",
+    //   price: "IDR 180,000",
+    //   image: "/banner.jpg",
+    //   inStock: stockData ? stockData.count10 < MAX_PARTICIPANTS : true,
+    //   link: "/register-running?category=10k",
+    //   stockCount: stockData?.count10 || 0,
+    //   remaining: stockData
+    //     ? MAX_PARTICIPANTS - stockData.count10
+    //     : MAX_PARTICIPANTS,
+    // },
   ];
 
   const targetAudience = [
